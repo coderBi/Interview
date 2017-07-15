@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>一个div固定在页面的中间，div内容为当前时间</title>
+	<style>
+		#showTime{
+			position:fixed;
+			display:table;
+		}
+	</style>
+</head>
+<body>
+	<div id='showTime'></div>
+</body>
+</html>
+<script>
+/*将时间格式化为 yyyy-MM-dd HH:mm:ss格式*/
+Date.prototype.format = function(){
+	return this.getFullYear() + '-' + this.getMonth() + '-'
+		+ this.getDate() + ' ' + this.getHours() + ':' + this.getMinutes() + ':' + this.getSeconds();
+}
+
+
+window.onload = function(){
+	var element = document.getElementById('showTime');
+	setInterval(function(){
+		var time = new Date().format('yyyy-MM-dd HH:mm:ss');
+		element.innerHTML = time;
+		var clientRect = element.getBoundingClientRect();
+		var bodyClientW = window.innerWidth | document.body.offsetWidth;  //前面是主流浏览器 后面是ie
+		var bodyClientH = window.innerHeight | document.body.offsetHeight;
+		//设置具体的位置
+		var left = (bodyClientW - clientRect.width) / 2;
+		var top = (bodyClientH - clientRect.height) / 2;
+		element.style.setProperty('left',left + 'px');		
+		element.style.setProperty('top',top + 'px');
+	},1000);
+}
+</script>

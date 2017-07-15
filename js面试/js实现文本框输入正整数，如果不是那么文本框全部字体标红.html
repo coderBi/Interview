@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>js实现文本框输入正整数，如果不是那么文本框全部字体标红</title>
+</head>
+<body>
+	<!--这里如果通过onchange事件进行判断，由于onchange需要等待输入框失去焦点才进行判断所以不是那么的及时。用onkeyup很好的额解决了这个问题-->
+	输入框：<input type='text' onkeyup='change(this);'/>
+</body>
+</html>
+<script>
+function change(element){
+	var value = element.value;
+	if(parseInt(value) != value
+		|| value <= 0){
+		element.style.setProperty('color','red');
+	}else{
+		element.style.removeProperty('color');
+	}
+}
+</script>
