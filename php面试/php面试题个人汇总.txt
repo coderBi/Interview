@@ -159,7 +159,7 @@ __invoke(): 将对象当做函数来使用的时候执行这个方法，但是�
 		---最好相同类型的字段进行比较，否则可能设计到类型的转换（转换过程可能使索引不起作用）。作为特殊情况，char和varchar的字段大小相同的时候可以进行比较。
 		---在建立了索引的字段上尽量不要使用函数操作，否则可能索引不能发挥应有的作用。
 		---优化like与通配符的模糊匹配
-			select * from books where name >='mysql' and name < 'mysql'
+			select * from books where name >='mysql' and name < 'mysqm'
 			语句可以用来代替下面的语句实现查找以mysql开头的name
 			select * from books where name like 'mysql%'
 
@@ -390,3 +390,118 @@ define('name','value');
 50，如何不适用submit按钮来提交表单
 答案：
 可以使用超链接和ajax提交。
+
+
+51，php中的count函数，如何使用count($var,0)实现count($var,1)
+答案：
+count()函数的第二个参数指示的是模式，可以取值为0和1，如果是0，表示只取一级的数组元素个数。如果为1，会递归的统计子数组的元素个数。例如array(array(1,2),array(1,2,3))如果模式是0得到的是2，但是如果模式是1得到的是 2 + 2 + 3 = 7 其中的后面的额外的2和3就是子数组的元素个数。如果还有更低级的子数组，还会进行递归的计算和叠加。
+要用count($var,0)实现count($var,1)可以根据上面的思想进行递归的计算： 一个数组本身的count($arr,0) + 数组中每一个子数组的count($arr[i],1)，后面的子数组的count($arr[i],1)便可以直接递归实现。这个递归的base是数组中没有子数组。
+大致代码如下：
+	/*
+		使用count($var,0)实现的count($var,1)效果函数
+	@param array $arr 要统计元素个数的数组
+	@return int 递归统计的数组的元素个数
+	*/
+	function count_1($arr=array()){
+		$toReturn = count($arr,0);
+		foreach($arr as $v){
+			if(is_array($v))
+				$toReturn += count_1($v);
+		}
+		return $toReturn;
+	}
+
+
+52，$input="2,4,8,16,32,64";如果计算这个字符串中数字的和
+答案：
+一般的处理方案是将字符串转成数组，然后进行累加
+	function sum($str=""){
+		$arr = explode(',',$str); //利用explode将字符串打散成数组
+		$toReturn = 0;
+		foreach($arr as $v){
+			$toReturn += $v;
+		}
+		/*
+			如果考虑到是等比数列的话，这里可以进行一次优化，具体如下
+			$toReturn = $arr[count($arr) -1] * 2 -1;
+		*/
+		return $toReturn;
+	}
+
+
+53, 这个判断语句有什么问题 if(!strpos($haystack,$needle)){}
+答案：
+strpos()函数返回一个子字符串首次出现的位置，如果没有找到返回false。由于可能出现找到的索引是0，所以上面在这种情况下不能正确判断是否成功找到了相应的字符串。正确的写法应该是 if(false !== strpos($haystack,$needle))
+
+
+54，什么是sql注入，如何防止sql注入
+答案：
+sql注入一般是指的由于后台代码不严谨没有对前台某型特殊的字符串进行处理或者过滤，导致前台可以传递sql语句(或者部分sql语句片段，扰乱原有的sql语句)并执行。
+防止sql注入，一般是通过将前台传入的特殊字符，例如 ""  '' 转义符\ 等进行转义处理再进行sql拼接，在php中一般通过使用addslashes函数进行转义处理。
+
+55,如果在不同的页面之间传递变量
+答案：
+	1）通过cookie, 一个页面setcookie('name','value');  另一个页面就可以通过 $_COOKIE['name']获取到这个变量
+	2）通过session，相对于cookie是存在浏览器上，session是存在服务器上。一个页面通过 session_start(); $_SESSION['name']='value'。另一个页面就可以通过session_start(); $_SESSION['name']获取到.
+	3）通过form表单，一个页面中有form表单，然后form的action目标是另一个页面，那么这个页面的form表单里面的值就传递到了另一个页面。
+	4）通过超链接的href中添加参数进行传递，例如一个页面上可以写一个超链接指向另一个php页面，这个链接的href后面就可以带上 "?k1=v1&k2=v2"这样的参数列表进行GET参数的传递。
+
+56，如何拿到浏览器的真实ip
+答案：
+获取浏览器ip： $_SERVER['HTTP_CLIENT_IP']
+获取代理的ip： $_SERVER['HTTP_X_FORWARDED_FOR'], 代理ip可能有多个，它们是用逗号隔开的。所以可以$ips = explode(',',$_SERVER['HTTP_X_FORWARDED_FOR']);
+获取服务器真实ip：通过访问http://city.ip138.com/city0.asp可以得到ip和所在地的简单信息（格式大致为:您的IP是：[36.36.200.124] 来自：广东省深圳市 有线宽带）。然后用正则 /\[([^\]]*)\]/ 匹配出里面的ip字段
+
+
+57，php脚本默认的最大之间时间是多少，如果设置这个时间
+答案：
+php脚本一般默认的执行时间上限是30s，如果超过了30s，脚本会终止执行，所以对于长时间的文件操作等需要设置更长的执行时间限制。
+可以通过set_time_limit(时间)这个函数来设置超时执行的时间。如果参数提供的是0，那么表示没有时间上的限制，会无限期执行。
+类似的可以通过set_memory_limit(0)来设置没有内存的限制(一般的php内存限制不会计算虚拟内存。而如果没有内存的限制那么程序会使用所有的内存)。
+
+58，使用mysqli
+答案：mysqli是php对mysql进行的扩展，相对于原生的mysql扩展，mysqli使用的是面向对象的实现，在php7之后php默认的已经不在支持mysql扩展，用户应该使用mysqli扩展。
+	创建mysqli对象  $mysqli = new mysqli("$host:$port",$user,$password)
+	执行命令 $mysqli->query('set names utf8') $mysqli->query("select * from information_schema where schema_name='$name'")
+
+
+59，如果执行系统命令
+答案：
+一般可以使用string exec(command[,resultArr[,returnCode]])进行系统命令的执行。这个函数返回的是一个命令执行的最后一行字符串，第二个参数如果提供了，会将命令执行的所有行的结果一行一行的追加到这个数组的后面，第三个参数如果提供了会返回命令执行的状态码，这个状态码一般是0.
+	exec('ls')
+	exec('chmod 775 . -R',$arr,$state)
+
+60，php中的sleep函数的作用是什么
+答案:
+暂时放弃线程的调度机会，让出cpu的控制权。时间单位是s.
+
+
+61,PHP中的函数默认的权限是什么，是private的吗？PHP中的反射如何使用
+答案：
+php中的函数默认的权限是public的。
+php中的反射使用：
+	$obj = new $classname();
+	$rf = new ReflectionMethod($classname,$method); //反射一个方法
+	//获取权限修饰符，判断权限是否为public（其实这里判断的有一点问题，因为php中默认的是public的，通过测试如果没有加上任何的修饰符，下面与的结果也是0，这里仅仅作为一个例子）
+	if(!(ReflectionMethod::IS_PUBLIC & $rf->getModifiers())){
+		echo "you do not hava the permition to access the method";
+		die;
+	}
+	//获取到一个函数的参数名称数组，下面invoke的参数列表的序列可以通过这里获取到名称数组进行相应顺序的形参传入.
+	$ps = $rf->getParameters();
+	$result = $rf->invoke($obj,参数1，参数2,...);
+
+62，如何通过.htaccess设置url重写
+答案：
+要使用.htaccess，首先要在php.ini中开启重写的扩展。然后在相应的要重写的目录(这里一般是网站入口文件所在目录)添加.htaccess文件。重写规则如下：
+	<IfModule mod_rewrite.c>
+	Options +FollowSymlinks
+	RewriteEngine On
+
+	#下面两个语句表示如果是当前这个目录的中的子目录或者是文件路径就不进行重写
+	RewriteCond %{REQUEST_FILENAME} !-d
+	RewriteCond %{REQUEST_FILENAME} !-f
+	#下面是利用正则匹配url 并进行重写 其中下面的"L"表示这个重写规则是最后一个重写规则
+	RewriteRule ^(.*)$ index.php?/$1 [QSA,PT,L]
+	</IfModule>
+

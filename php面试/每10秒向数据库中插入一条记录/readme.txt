@@ -1,0 +1,2 @@
+1,IntervalFunc只是定时执行一段php，不舍及数据库操作
+2，IntervalInsertIntoDB是每隔一段时间向数据库插入一条记录，这个案例是某个公司的面试题。1,IntervalFunc只是定时执行一段php，不涉及数据库操作

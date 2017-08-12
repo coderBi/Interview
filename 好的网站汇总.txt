@@ -1,0 +1,21 @@
+﻿http://csdn.com
+http://stackoverflow.com
+http://codeproject.com
+http://www.cplusplus.com/doc/tutorial
+http://51cto.com
+http://www.cnblogs.com
+http://leetcode.com
+https://github.com/soulmachine/leetcode  (leetcode题解供参考)
+http://wikioi.com
+http://codility.com
+http://coolshell.cn
+https://www.hackerrank.com
+http://www.itmian4.com  (IT面试)
+http://www.51projob.com (程序员求职网)
+http://www.jobcoding.com (《程序面试笔试宝典》官网)
+http://s.sousb.com (程序员面试之家)
+http://hawstein.com/posts/ctci-solutions-contents.html (Cracking the coding interview 问题与解答)
+http://codepad.org/  在线提交运行代码，图形化较差，没有代码提示跟不全，tab也不好用。整体体验不好。
+http://www.fenby.com/ 比较好的在线学习资源。拥有代码提交的功能
+http://ideone.com/dy1ZUu 拥有较好的代码提示，但是网络环境不是很好。
+http:/www.appgamekit.com/documentation AGK（app game kit）的联机访问文档

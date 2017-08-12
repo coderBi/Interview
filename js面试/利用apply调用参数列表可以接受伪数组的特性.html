@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>利用apply调用参数列表可以接受伪数组的特性</title>
+</head>
+<body>
+</body>
+</html>
+<script>
+var a = {};
+a.length = 0;
+a[a.length++] = 'a';
+a[a.length++] = 'b';
+
+var arr = [];
+var newarr1 = arr.concat(a); //concat是将两个数组中的内容进行拼接，这样写由于a是伪数组，导致直接将a作为一个整体加入了另一个数组
+console.log(newarr1);
+
+var newarr2 = Array.prototype.concat.apply(arr,a);
+console.log(newarr2); //利用apply调用会展开伪数组的特性可以得到正确的结果.
+
+var newarr3 = arr.slice.apply(a,[1]); //也可以写成 Array.prototype.slice.apply()。这个例子是将第一个参数传入了伪数组
+console.log(newarr3);
+</script>

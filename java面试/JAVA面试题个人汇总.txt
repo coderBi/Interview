@@ -1,0 +1,35 @@
+1，java中的四种权限
+答案：
+java中有四种权限，分别是: private 默认权限  protected public
+private: 只能在本类中使用
+默认权限: 只能在包内访问，实际权限大小介于private和protected之间.
+protected: 继承类中可访问
+public: 最大的访问权限，可以直接用 对象.方法进行访问
+
+
+2，int a = 10，请实现system.out.printf(a);输出100
+答案：
+在java中对于-128~127之间的int，在Integer类的内部类IntegerCache内部存了一个缓存的Integer对象数组，用于拆装箱的时候直接取出，不用构造对象。所以可以利用修改Integer的内部对象数组的方式，让其在取出一个较小的Integer的时候取出一个非默认值.
+具体的实现代码如下：
+	public static void changeInnerArray(){
+		//获取内部类 使用getDeclaredClasses只能获取到本类中申明的内部类，不能获取到继承的内部类
+		Class<?>[] classes = Integer.getDeclaredClasses();
+		//遍历这些内部类 找到简单名称为IntegerCache的
+		Class<?> integerCahce = null;
+		for(Class<?> item:classes){
+			if("IntegerCahce".equals(item.getSimpleName())){
+				integerCahce = item;
+				break;
+			}
+		}
+		//获取IntegerCache中的Integer数组
+		Field field = integerCache.getDeclaredField("cache");
+		//设置权限
+		field.setAccessible(true);
+		//获取内部数组
+		Integer[]] cache = (Integer[])field.get(null); //由于是静态数组，所以这里的get参数传递的对象为null
+		
+		//由于java中数组的传递是引用传递，所以这里可以直接通过修改这个数组达到目的。（不过要注意的是这个cache是 static final的，这里的final的意思是指内部这个变量cache的指向不能更改，并不是说数组的值不能更改，这一点和C++有所区别）
+		cache[10 + 128] = 100; //之所以会是 10+128因为cache数组是用-128开始的。
+	}
+----note：指的注意的是在测试时发现由于自动拆装箱是java5以后出来的，而system.out.println("" + a)是在之前老的实现，所以没有对a进行装箱，这里的a是简单的int类型，如果使用system.out.println("" + Integer.valueOf(a))可以得到结果。另外题目一般要求的用system.out.printf("%d",a)这个是有装箱的。
