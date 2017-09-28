@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>正数到字符串的简单转换</title>
+</head>
+<body>
+<script>
+/*
+题目描述：
+	如果简单进行正数与字符串之间的转换
+答案：
+	因为是正数，所以对于字符串，只需要使用一个整数符号就可以转换。而数字到字符串的转换只需要"" + 数字就行。
+	1）正数到字符串： "" + a
+	2）字符串到正数: + "1"
+扩展：
+	使用parseInt 和 parseFloat可以将其他的类型转换为整数和浮点型。使用内置类型的构造函数可以实现类型的转换,例如Number("11.2244")
+*/
+
+	console.log(+"1111"); //字符串到正数
+	console.log("" + 222); //数字到字符串
+	console.log(parseInt("333.22"));
+	console.log(parseFloat("333.22"));
+
+	//使用内置类型的构造函数进行类型的转换
+	console.log(typeof Number("11.2244")); //number
+</script>
+</body>
+</html>

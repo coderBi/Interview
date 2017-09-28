@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>js中catch捕获到的异常变量的作用域只对catch语句块可见</title>
+</head>
+<body>
+<script>
+	var msg = "";
+	function test(){
+		try{
+			throw Error("there is an error");
+		}catch(e){
+			msg = e.message;
+			var varTest = "test var";
+		}finally{
+			//和java一样，无论是否有一样抛出，都会执行到
+			console.log("these code excute no matter whether there is a exception catched above");
+			//即使是在finally里面也是看不到捕获到的异常对象的，因为异常对象只在catch的代码块中可见
+			console.log("the type of exception object in finally is :" + typeof e); //undefined
+		}
+		//测试捕获到的异常变量e和在catch代码块中定义的变量varTest，在当前的作用域里面是否可以访问的到
+		console.log("the catched exception variable is undefined: " + ('undefined' === typeof e ? "yes" : "no"));
+		console.log("the variable varTest defined in catch section is undefined: " + (undefined === varTest ? "yes" : "no"));
+
+		//注意下面的使用会直接报错，因为使用了未定义的e(e is not defined)进行取值运算(并没有分配任何的空间)。运行到这里代码执行失败
+		console.log("the catched exception variable is undefined: " + (undefined === e ? "yes" : "no"));
+	}
+	test();
+	console.log("msg: " + msg);
+</script>
+</body>
+</html>

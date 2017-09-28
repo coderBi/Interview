@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>局部变量对全局变量的屏蔽</title>
+</head>
+<body>
+<script>
+	//注意：这段代码在C/C++中运行的结果是aabb，原因是在屏蔽之前还是会调用原来的全局的tt。php与
+	var tt = 'aa';
+	var dd = 'another';
+	function test(){
+		alert(tt); //undefined，原因是在函数的内部使用了tt对全局的tt的屏蔽，但是代码执行到这一行的时候tt又还没有实际定义，所以会是undefined
+		alert(dd); //another，因为函数的内部没有进行屏蔽，所以使用全局的dd
+		var tt = 'dd';
+		alert(tt); //dd，原因是内部的tt对全局的tt进行了屏蔽并且运行到这里tt已定义
+	}
+	test();
+</script>
+</body>
+</html>

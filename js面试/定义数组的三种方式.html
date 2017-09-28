@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>定义数组的三种方式</title>
+</head>
+<body>
+<script>
+	//推荐使用的，直接使用[]定义
+	var arr1 = [1,2,3];
+	//类似与php中的写法
+	var arr2 = Array(1,2,3); //js对大小写敏感,array必须首字母大写
+	//new对象
+	var arr3 = Array(3,2,1);
+	console.log(arr1,arr2,arr3);
+
+	//关联数组
+	var assoc = {'1a':2};
+	//console.log(assoc.1a); //语法错误
+	console.log(assoc['1a']); //关联数组中如果key是数字开头，只能使用[]访问，因为这个属性不符合变量命名规则
+</script>
+</body>
+</html>

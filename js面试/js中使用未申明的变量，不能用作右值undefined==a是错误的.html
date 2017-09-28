@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>js中使用未申明的变量</title>
+</head>
+<body>
+<script>
+	/*
+	使用总结：
+		1）没有申明的变量，只能用作左值（进行赋值），不能用作右值进行取值。
+		2）没有申明的变量，可以使用typeof运算符，得到的结果是"undefined"，这个基本上是未申明变量唯一的可以使用的运算
+		3）由于不能用为右值，所以 undefined == 未定义的变量  和 undefined === 未定义的变量 都会报错:  is not defined
+	*/
+
+	/*
+	//用做判断条件 这里其实也是当右值用，所以报错：the reference a is not defined
+	if(a){
+		console.log("the value is true");
+	}else{
+		console.log('the value is false');
+	}
+	*/
+
+	//用作typeof操作符的操作数，结果是"undefined"
+	console.log(typeof a);
+	/*
+	//取值 用作右值。由于没有定义，所以不能用作右值（取值）
+	console.log(a + "");
+	console.log(a);
+	*/
+
+	/*未申明的变量不能用作左右，也不能与undefined相比*/
+	//console.log(undefined == a);
+
+</script>
+</body>
+</html>

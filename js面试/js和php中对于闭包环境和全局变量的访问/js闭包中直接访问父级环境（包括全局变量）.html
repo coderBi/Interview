@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>js闭包中直接访问父级环境（包括全局变量）</title>
+</head>
+<body>
+<script>
+/*
+题目描述：
+	js和php中对于全局变量的访问有什么不同
+分析：
+	php中默认是不能函数外部变量的，也即是不能直接访问全局变量，默认情况下也不能直接访问闭包环境中的外部函数中的变量。如果要使用全局变量可以是用global $a。如果要使用父级环境中的变量可以使用use $var。而在js中对于闭包环境中的变量（包括全局变量）可以直接访问。
+*/
+var a = 2;
+var func = (function(){
+	var sum = function(){return a + b};
+	var b = 3;
+	return sum;
+})();
+console.log(func()); //返回的这个闭包中引用了全局的变量a和匿名函数内部的b。在执行func()的时候会进入sum函数体，在函数体内部由于没有a和b的定义所以寻找其scope属性也就是匿名函数的variables对象，在其中找到了b的定义，但是没有找到a，随意会接着寻找匿名函数的scope属性也就是全局的variables对象，在其中找到a的定义，随意函数func()最终会得到5
+</script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>js中命名函数表达式与函数的length属性</title>
+</head>
+<body>
+<script>
+/*
+题目描述：
+	js中一个函数的length属性有什么用。js中的命名的函数表达式是什么，和函数的name属性有什么关系
+分析：
+	1)在函数内部如果使用arguments.length属性可以获取到传入的实参的个数，但是如果要获取形参列表中申明了多少个形参，就得使用函数的length属性。这个属性可以获取到一个函数的形参列表中的参数的个数。（注意：js中函数是对象，所以可以有各种属性，用户也可以在给函数设置个性化的属性值进行驻留，用给下一次的调用）
+	2)js中定义一个函数一般可以直接使用function加上函数名和函数体进行定义。同时还有另一种常用的方法，是使用函数表达式的形式，具体的格式为 var func = function(){}; 这个时候function就成了一个操作符，而整写法就成了一个赋值语句。上面的写法是一般的匿名函数表达式，也可以使用命名函数表达式 var func = function namedFunc(){}; 这个函数的名称是namedFunc，可以通过func.name获取到。
+	3）对于命名函数表达式，其中的函数名只是函数名了，不能用来进行函数的调用。例如上面的 typeof namedFunc = 'undefined'。函数的调用只能通过通过表达式左边的var变量进行。
+	4）对于命名的函数表达式，一般将名称与左边的var的变量名写成一致。在早期的ie中，typeof namedFunc的结果是function（也就是说会创建两个变量）。还有如果二者的名称不一样，容易造成一些混淆。除非函数的名称在函数体中被用到，否则一般大家都是简写成匿名的函数表达式。
+补充说明：
+	1）通过测试，如果函数表达式是匿名的，那么函数的name默认就是赋值表达式左边的变量名，又通过上面的分析，推荐将命名函数表达式的名称写成跟定义的var变量的名称一致（避免混淆）。那么这里得到的结论是命名函数表达式的用处基本没有。
+	2）函数变量进行传递的时候，尽管调用的形式各异，但是函数的名称不会改变
+	3）因为老版本的ie中存在命名函数表达式会创建两个符号的情况，而匿名函数表达式各种浏览器之间不存在兼容问题，都是创建一个变量然后将函数的name属性设置为默认的var变量的名称。所以从兼容性和实用性上看，都应该避免使用（除非自己独特安排和考量）命名函数表达式。
+*/
+
+//函数的length属性，与arguments.length属性
+function test(a, b){
+	console.log("函数的形参个数：" + test.length); //2 固定的2
+	console.log("函数的实际传入参数个数：" + arguments.length);
+}
+test(1); //输出2 1
+test(1,2,3,4); //输出 2 4，对于传递的额外的参数会被舍弃掉
+
+//匿名函数表达式
+var func1  = function(){
+	console.log("func1");
+};
+console.log(func1.name); //func1
+
+//命名函数表达式
+var func2  = function namedfunc(){
+	console.log("func2");
+};
+console.log(func2.name); //namedfunc
+console.log(typeof namedfunc); //函数的名称不会单独创建一个符号，这里的结果为undefined（但是在老版本的ie中可能存在创建了两个符号而这里的结果为function的情况）
+
+//函数间赋值,函数变量进行传递，但是函数名称不会改变
+var func3 = func1;
+console.log(func3.name); //func1
+</script>
+</body>
+</html>

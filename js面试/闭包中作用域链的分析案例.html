@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>闭包中作用域链的分析案例</title>
+</head>
+<body>
+<script>
+/*
+作用域链分析：
+	进行scope属性和variables对象逐行分析，更好的了解这两个属性在闭包中的作用
+*/
+var i = 1;
+	function test(){
+		var sum = function(){return a + b + i;};
+		var a = 2, b = 3;
+		return sum();
+	}
+	console.log(test());
+/**
+对上面代码分析：首先构建全局的variables对象对象，其中存在一个var i = 1和test函数，test由于是一个函数，所以会设置一个scope属性指向全局的variables对象。然后执行test()，进入test函数体，构建test环境函数内部的variables对象，这这里面有一个sum函数和a、b变量，由于sum是一个函数所以会存在一个scope属性指向test函数内部的variables对象。然后执行return sum()会转入sum函数的定义体，在sum函数内部没有a和b的定义，所以会访问sum函数的scope属性也就是外部的test函数的variables对象，这里面可以找到a和b的定义，所以会引用这的a和b，但是test函数的内部也没有i的定义，所以会进一步的访问test函数的额scope属性也就是全局的variables对象，找到了i的定义。故sum函数返回了6。
+*/
+</script>
+</body>
+</html>	

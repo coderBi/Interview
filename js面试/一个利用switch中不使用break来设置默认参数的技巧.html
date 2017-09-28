@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>一个是设置默认参数的技巧</title>
+</head>
+<body>
+<script>
+	/*
+		这个技巧的主要特别之处是利用了switch中，如果在一个case下面没有使用break（或者是continue、return之类的控制跳转的语句），那么会在执行完当前的case下面的代码之后接着无条件（不再进行case的判定）的后面的case下面的代码一直到遇到break等控制结构跳转的语句后者是switch执行体结束
+	*/
+	function test(a,b,c,d){
+		//在php中使用func_get_args()函数获取传入的参数列表，在js中使用arguments对象进行获取
+		switch(arguments.length){
+			case 0: a = 1;
+			case 1: b = 2;
+			case 2: c = 3;
+			case 3: d = 4;
+		}
+		return a + b + c + d;
+	}
+	console.log(test()); // 1 + 2 + 3 + 4 = 10 会为4个参数赋默认值
+	console.log(test(1)); //10
+	console.log(test(11)); //11 + 2 + 3 + 4 = 20 会为3个参数赋默认值
+	console.log(test(1,2,3,24)); // 1 + 2 + 3 + 24 = 30
+	console.log(test(11,22)); // 11 + 22 + 3 + 4 = 40 为最后的c和d这两个参数赋默认值 
+</script>
+</body>
+</html>

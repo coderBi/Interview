@@ -21,3 +21,275 @@ func.call(对象，参数列表)
 答案：
 编码的时候，可以将参数设置为0，但是实际执行的效果不会马上执行。理论上在苹果操作系统上，可以认为是10s，在windows操作系统上可认为是15s。在html中定义的最小时间间隔是4s，而Firefox中给出的最小时间间隔的定义是10s。如果要设置最小时间间隔执行，一般可设置setTimeout(function,1,参数1，参数2，...)
 --note:测试的时候，指的注意的是，如果打开firebug，由于console.log有自己的最小时间，所以，如果设置的时间间隔很小，将会看到，执行的明显减低了，关闭firebug可以看到真实的执行效率。
+
+
+3，下面的代码的执行结果是什么
+	var tt = 'aa';
+	function test(){
+		alert(tt);
+		var tt = 'dd';
+		alert(tt);
+	}
+	test();
+答案：
+输出undefined和dd，原因是js中一开始就判断函数内部对全局的变量tt进行了屏蔽，所以在函数执行的过程中不会考虑全局的tt，又由于第一个alert的时候局部的tt还没有定义，所以会出现一个undefined。
+---note: 同样的打印如果出现在C/C++中，会打印aadd，原因是在第一个打印的语句的时候判断在函数的内部还没有对全局的tt进行屏蔽，所以会打印出aa。值得注意的是在php和js中没有复合语句的单独作用域，只会区分函数内还是函数外，这点与c和c++不同。
+
+
+4,下面的代码输出什么
+	var a;
+	alert(typeof a === undefined);
+	alert(typeof a == undefined);
+答案：
+typeof a输出的结果是字符串类型，a由于只有申明没有定义，所以这里的值是undefined的，类型是"undefined"。所以typeof a 得到的是 "undefined"的这个字符串。这个字符串内容不为0 0.0或者空，所以a != undefined，当然更不可能 ===,因为二者的类型都不同，undefined的类型是一个独立的类型.
+
+
+5，typeof null返回的是什么
+答案：
+返回的是"object"，以后的ES可能会返回"null"
+
+6，js中的数据类型
+答案：
+1）bool类型  
+2）数值类型(没有单独的float int double，他们都是同一个数值类型 typeof得到的结果是"number")
+3）string类型
+4）null类型  但是比较特殊的是这种类型的typeof返回的是"object"
+5）undefined类型，表示没有定义只有申明的值，typeof undefined = "undefined"
+6）数组类型 typeof结果为object
+7）对象类型(function)
+8）regex类型 typeof得到的也是object
+
+
+7，什么是ECMAScript
+答案：
+ECMA是欧洲计算机制造商协会，ECMAScript就是遵循这个协会定义得标准的Script。目标对ECMA标准的实现主要有火狐的JavaScript和微软的JScript，但是市面上很多时候并没有区分这两种script。JavaScript本身是一种脚本语言，与BOM和DOM构成了用户进行浏览器端交互开发的技术手段。
+
+8,$符号在JavaScript中有什么作用
+答案；
+并没有什么作用，js中规定变量的命名规则可以是用数组下划线字母和$符号，但是数字不能写在开头，一般来说$命令的函数和变量建议只出现在中间生成代码中。目前$更多的用在一些第三方JS库中，用作选择器函数，例如jquery.
+
+9，下面的表达式的结果是多少
+	false ? 1 : 2 ? 3 : 4 ? 5 : 6
+答案与分析：
+和C++一样js中对于这两的连续的三目运算存在短路现象，第一个三目运算计算的结果是2，然后2作为判断条件计算 (2 ? 3 : 4 ? 5 : 6)，2判断为真然后短路直接返回3，不会进行后续的计算。（note：php中也是从左往右进行扫描，但是没有短路效果）
+
+
+10，js中的switch与php中的switch有何异同
+答案：
+js和php中的switch都可以对各种数据类型进行判断，这一点和C++ java等强类型的语言不同。但是php中的case中的匹配是进行弱类型的匹配，也就是使用的是==，而js中switch里面的case条件的匹配是严格匹配的，会考虑传入的数据类型，也就是使用的是===。例如下面的代码在php中匹配到了""而在js中使用严格匹配匹配到了后面的0:
+		switch(0){
+		case '':
+			break;
+		case 0: 
+			break;
+		}
+
+11，非严格比较中，那些值是假值（注意区分概念，假值并不是与false相比，false也是个假值）
+答案：
+0 0.0 "" false null undefined NaN
+以下是实测结果与代码：
+	/*
+		1）0.0 和 0没有任何区别
+		2）虽然"0" == 0但是“0” 和 “0.0”不是假值，如果放到括号中判断，结果是真(值)。
+		3）假值与false不是完全一回事，false也是个假值。false!=undefined undefined!=0 但是他们都是假值
+		4）是否值真值与是否==false并不完全一致，例如undefined的是假值，但是undefined != false，类似的还有null,NaN。相应的,==false的并不一定可以用作假值，例如"0","0.0"（尽管他们与0相等）。所以if(a)是用来判断a是否是假值的，而if(a == false)是用来判断a是否==false(其实false也是0，所以会与0,0.0,'','0','0.0'都相等，但是不与null undefined NaN相等)的
+	*/
+	function equals2false(compare){
+		//判断是是否与false ==
+		if(false != compare){
+			console.log(".. " + compare + " not equals to false");
+		}else{
+			console.log(".. " + compare + " equals to false");
+		}
+		//判断是假值还是真值，这里与false == 的结果并不完全相同，应该规避这个误区
+		if(compare){
+			console.log("-- " + compare + " works as true value");
+		}else{
+			console.log("-- " + compare + " works as fasle value");
+		}
+	}
+	equals2false(undefined); //undefined是假值，但是!=false
+	equals2false(0); //0是假值，也==fasle
+	equals2false(0.0); //0.0与0是一个东西，是假值与false==
+	equals2false(""); //是假值，==false
+	//字符串类型中只有空串为假值，下面的"0" "0.0"都不是false
+	equals2false("0"); //是真值，但是==false
+	equals2false("0.0"); //是真值，但是==false
+	equals2false(null); //是假值，但!=false
+	equals2false(NaN); //是假值，但!=false
+
+12，js中如果函数没有返回值，默认返回的是什么
+答案：
+在js中如果一个函数的参数没有传入，这个参数的默认值是undefined，如果一个函数的返回值没有指定那么默认值是undefined。可以通过将传入的参数的$a === undefined判断参数是否进行了传入，也可以通过typeof a === "undefined"判断是否有参数的传入（因为类型为"undefined"的只有undefined这一个）.
+
+
+13，下面的代码执行结果是什么
+	if([])
+		alert('yes');
+	else
+		alert('no');
+分析：
+js中空数组是真值，不是假值。所以会打印no。但是注意php中空数组是empty的所以用在判断条件中结果是假(php中if(a)和if(!empty(a))作用一样)
+
+
+14，js中如何使用异常，catch到的异常变量的作用域是什么
+分析与答案：
+	var msg = "";
+	try{
+		throw Error('wrong');
+	}catch(e){
+		msg = e.message;
+	}finally{
+		//一定会执行得到的代码，但是据说在ie7和之前的版本存在bug
+	}
+js中抛出的是Error，而php中使用的Exception，捕获是php中catch会申明为Exception e，而js中直接是一个无类型的e。
+在js中，和php一样存在函数内部的作用域和函数外部的作用域的区别，但是对于catch语句块存在一个意外，就是catch语句块中捕获到的异常变量的作用返回只有catch语句块可见(但是在catch语句块中定义的变量对整个函数都是可见的)。
+
+15，一个变量赋值为undefined和只是申明没有赋值的undefined跟使用没有申明的变量有何区别
+答案：
+var a = undefined. 和 var a 没有任何区别，一个变量只是申明，没有定义（赋值）那么默认值就是undefined。而使用了没有定义的变量，虽然typeof操作符得到的结果是undefined的，但是不能直接进行取值运算，例如a == undefined也会报一个引用了未定义的变量的错误，变量在没有申明的情况下不能用作右值。
+下面是具体的代码的测试结果:
+	/*
+	使用总结：
+		1）没有申明的变量，只能用作左值（进行赋值），不能用作右值进行取值。
+		2）没有申明的变量，可以使用typeof运算符，得到的结果是"undefined"，这个基本上是未申明变量唯一的可以使用的运算
+		3）由于不能用为右值，所以 undefined == 未定义的变量  和 undefined === 未定义的变量 都会报错:  is not defined
+	*/
+
+	/*
+	//用做判断条件 这里其实也是当右值用，所以报错：the reference a is not defined
+	if(a){
+		console.log("the value is true");
+	}else{
+		console.log('the value is false');
+	}
+	*/
+
+	//用作typeof操作符的操作数，结果是"undefined"
+	console.log(typeof a);
+	/*
+	//取值 用作右值。由于没有定义，所以不能用作右值（取值）
+	console.log(a + "");
+	console.log(a);
+	*/
+
+	/*未申明的变量不能用作左右，也不能与undefined相比*/
+	//console.log(undefined == a);
+
+16，如果简单进行正数与字符串之间的转换
+答案：
+因为是正数，所以对于字符串，只需要使用一个整数符号就可以转换。而数字到字符串的转换只需要"" + 数字就行。
+1）整数到字符串： "" + a
+2）字符串到数字: + "1"
+3）在js中可使用parseInt和parseFloat将其他类型转换为int和float浮点型
+
+17，js中的void是什么
+答案：
+js中void是一个操作符，无论传入任何表达式，其返回值都是undefined（一般的函数如果没有指定返回值，那么默认返回undefined）。实际上很多代码存在对void和typeof操作符的不正常使用，例如 href=“JavaScript:void(0)”,首先void是一个操作符，void()是计算一个()表达式然后将表达式的值赋给操作符void，所以括号完全是多余的，void也并不是什么函数。其次void操作符返回undefined，而这里的href写成这样往往意味着什么也不做（除非有人要在void操作数表达式上进行运算，不过这个基本没有意义）,可以直接写成href="JavaScript:undefined"
+
+
+18,js中的逻辑运算符||的返回值是什么，与php有何不同。js中的&&运算符返回值与php中是否一样
+答案：
+1）||在js中，如果左边的表达式不是假值，那么返回左边的表达式的值，否则返回右边的表达式的值，最终的返回值不一定是bool类型的。而在php中||运算返回的是bool类型，要么是true要么是false（所有存在这里样的php面试题 if($a = 2 && $b = 5)这个表达式会将后面的$b=5然后与2进行&&得到true赋给$a）。
+2）&& 在js中，如果左边的运算数是真值就返回右边的值，如果左边的是假值就进行逻辑短路直接返回值这个假值。同样php中所有的逻辑运算返回的都是bool类型
+3）js中常常利用||运算符的特性，给数据设置默认值. var a = a || 'hello world'（一个小问题是，这里的变量前面最好要加上var，如果在形参中有这个变量的申明，那么这里是再次申明没有问题。如果是形参中写漏了之类的，这里如果没有var，就会导致出现一个全局的变量，如果外层的确存在这个变量，那么测试过程中就可能会出现无法预料的问题）
+下面是进行测试的部分代码：
+	//下面的测试应该注意算符运算符高于逻辑运算符，所以要加上括号
+	console.log("2 || 3 : " + (2 || 3)); //2，前面的为真值就进行逻辑短路，直接返回前面的值
+	console.log("0 || 3 : " + (0 || 3)); //3，前面的为假值就返回后面的
+
+	console.log("2 && 3 : " + (2 && 3)); //3，前面为真值就返回后面
+	console.log("0 && 3 : " + (0 && 3)); //0，前面为假值就直接返回前面的假值，进行逻辑短路
+
+	//测试||运算符左边是假值
+	console.log(0 || 3); //3
+	console.log(0.0 || 3); //3
+	console.log(false || 3); //3
+	console.log(null || 3); //3
+	console.log(undefined || 3); //3
+	console.log('' || 3); //3
+	console.log(NaN || 3); //3
+
+19,对一个函数进行typeof操作得到的是什么
+答案：
+function。js中函数也是对象，可以有属性。
+
+
+20, js中一个函数的length属性有什么用。js中的命名的函数表达式是什么，和函数的name属性有什么关系
+分析：
+1)在函数内部如果使用arguments.length属性可以获取到传入的实参的个数，但是如果要获取形参列表中申明了多少个形参，就得使用函数的length属性。这个属性可以获取到一个函数的形参列表中的参数的个数。（注意：js中函数是对象，所以可以有各种属性，用户也可以在给函数设置个性化的属性值进行驻留，用给下一次的调用）
+2)js中定义一个函数一般可以直接使用function加上函数名和函数体进行定义。同时还有另一种常用的方法，是使用函数表达式的形式，具体的格式为 var func = function(){}; 这个时候function就成了一个操作符，而整写法就成了一个赋值语句。上面的写法是一般的匿名函数表达式，也可以使用命名函数表达式 var func = function namedFunc(){}; 这个函数的名称是namedFunc，可以通过func.name获取到。
+3）对于命名函数表达式，其中的函数名只是函数名了，不能用来进行函数的调用。例如上面的 typeof namedFunc = 'undefined'。函数的调用只能通过通过表达式左边的var变量进行。
+4）对于命名的函数表达式，一般将名称与左边的var的变量名写成一致。在早期的ie中，typeof namedFunc的结果是function（也就是说会创建两个变量）。还有如果二者的名称不一样，容易造成一些混淆。除非函数的名称在函数体中被用到，否则一般大家都是简写成匿名的函数表达式。
+
+补充说明：
+1）通过测试，如果函数表达式是匿名的，那么函数的name默认就是赋值表达式左边的变量名，又通过上面的分析，推荐将命名函数表达式的名称写成跟定义的var变量的名称一致（避免混淆）。那么这里得到的结论是命名函数表达式的用处基本没有。
+2）函数变量进行传递的时候，尽管调用的形式各异，但是函数的名称不会改变
+3）因为老版本的ie中存在命名函数表达式会创建两个符号的情况，而匿名函数表达式各种浏览器之间不存在兼容问题，都是创建一个变量然后将函数的name属性设置为默认的var变量的名称。所以从兼容性和实用性上看，都应该避免使用（除非自己独特安排和考量）命名函数表达式。
+测试代码如下：
+	//函数的length属性，与arguments.length属性
+	function test(a, b){
+		console.log("函数的形参个数：" + test.length); //2 固定的2
+		console.log("函数的实际传入参数个数：" + arguments.length);
+	}
+	test(1); //输出2 1
+	test(1,2,3,4); //输出 2 4，对于传递的额外的参数会被舍弃掉
+
+	//匿名函数表达式
+	var func1  = function(){
+		console.log("func1");
+	};
+	console.log(func1.name); //func1
+
+	//命名函数表达式
+	var func2  = function namedfunc(){
+		console.log("func2");
+	};
+	console.log(func2.name); //namedfunc
+	console.log(typeof namedfunc); //函数的名称不会单独创建一个符号，这里的结果为undefined（但是在老版本的ie中可能存在创建了两个符号而这里的结果为function的情况）
+
+	//函数间赋值,函数变量进行传递，但是函数名称不会改变
+	var func3 = func1;
+	console.log(func3.name); //func1
+
+
+21，什么是作用域提升
+答案：
+指的是将变量的申明进行提升，例如在函数内部，会对函数体中的所有的变量的申明进行提升到函数体的最顶端（这个是js解释器做的事情），这样这些变量对于整个函数的作用域都是可见的。但是这里提升的只是申明，对于变量的赋值并没有同时提升。所以在赋值之前这些变量是默认值undefined。由于存在作用域的这种提升，所以将申明写在使用之后并不会出现is not defined的错误，而是使用了一个undefined的值。同样的分析适合于全局变量，他们将提升到所有代码执行之前
+
+
+22，全局环境下,下面的语句执行结果是什么，原因是什么
+	if(false){
+		var a = "hello";
+	}
+	alert(a);
+分析：
+首先，在全局作用域下，无论是否使用var申明，a都是全局的变量，而且js中不存在复合语句块作用域。其次，js中存在变量作用域的提升，所有的申明会提升到最顶端（如果是函数内部，会提升到函数执行体的最顶端）。所以在alert(a)之前a是拥有申明的，但是由于赋值不会进行提升，而且这里的if判断条件为假导致没有提升的赋值语句不会执行到，所以a的内容是undefined。从上面的描述可以得到alert(a)打印的是undefined，不会报is not defined的错误，而是使用了一个undefined的值。同样的分析适合于全局变量.
+
+23，对于函数表达式和函数申明两种类型的函数定义的形式，其进行作用域的提升有什么不同
+答案：对于函数表达式形式的函数定义，在提升的过程中只是提升了申明，所以在定义语句之前这个函数的类型是undefined的，但是如果是函数申明形式的函数定义，那么函数的定义（实现）是一起提升的，相当于将函数的定义放到了作用域的顶部。
+下面的测试代码可以说明问题：
+	(function(){
+		console.log(typeof express); //undefined, 函数表达式，只是提升了申明，没有提升定义
+		console.log(typeof declare); //function，函数申明，提升的是定义
+		var i = 1;
+		var express = function(){};
+		function declare(){};
+	})();
+
+
+24，什么是闭包，什么是作用域链
+答案：闭包就是一个函数和其非局变量（也就是函数的外部）的环境。php是从5.3开始支持闭包和函数表达式(例如：$func=function($a,$b){})的。一个函数可以访问这个函数定义所在环境中的变量，这种父级函数和子级函数的关系形成了一条链，就是作用域链。js解释器进入一个函数的时候会将这个函数的局部收集起来存放到一个特殊的variables对象中。而在函数定义的过程中会设置其scope属性，这个属性指向了外部函数的variables对象（如果外部是全局的环境，那么保存的是全局的variables对象的引用），这个scope属性不是在执行阶段而是在定义阶段确定的。
+全局环境下分析下面的程序执行过程：
+	var i = 1;
+	function test(){
+		var sum = function(){return a + b + i;};
+		var a = 2, b = 3;
+		return sum();
+	}
+	test();
+分析：首先构建全局的variables对象对象，其中存在一个var i = 1和test函数，test由于是一个函数，所以会设置一个scope属性指向全局的variables对象。然后执行test()，进入test函数体，构建test环境函数内部的variables对象，这这里面有一个sum函数和a、b变量，由于sum是一个函数所以会存在一个scope属性指向test函数内部的variables对象。然后执行return sum()会转入sum函数的定义体，在sum函数内部没有a和b的定义，所以会访问sum函数的scope属性也就是外部的test函数的variables对象，这里面可以找到a和b的定义，所以会引用这的a和b，但是test函数的内部也没有i的定义，所以会进一步的访问test函数的scope属性也就是全局的variables对象，找到了i的定义。故sum函数返回了6。
+
+
+25，js和php中对于全局变量的访问有什么不同
+答案：php中默认是不能函数外部变量的，也即是不能直接访问全局变量，默认情况下也不能直接访问闭包环境中的外部函数中的变量。如果要使用全局变量可以是用global $a。如果要使用父级环境中的变量可以使用use $var。而在js中对于闭包环境中的变量（包括全局变量）可以直接访问。

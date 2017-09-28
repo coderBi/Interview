@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>js中三元运算符</title>
+</head>
+<body>
+<script>
+	//三元运算符的结合方向是从左到右的，所以这里的表达式解释为 (true ? 1 : 2) ? 3 : 4，但是js和C++中会对这整个的表达式进行短路，也就是不会计算完括号中的值再与后面的进行运算，这里因为第一个?的判断是真，所以直接返回1
+	var result = true ? 1 : 2 ? 3 : 4; //1 一开始就短路
+	console.log(result);
+
+	
+	var result = false ? 1 : 2 ? 3 : 4 ? 5 : 6; //3，第一个不成立，将得到的结果值2作为条件进行第二个的计算得到3
+	console.log(result);
+</script>
+</body>
+</html>

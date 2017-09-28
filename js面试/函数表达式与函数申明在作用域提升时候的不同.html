@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>函数表达式与函数申明在作用域提升时候的不同</title>
+</head>
+<body>
+<script>
+/*
+题目描述：
+	对于函数表达式和函数申明两种类型的函数定义的形式，其进行作用域的提升有什么不同
+分析：
+	对于函数表达式形式的函数定义，在提升的过程中只是提升了申明，所以在定义语句之前这个函数的类型是undefined的，但是如果是函数申明形式的函数定义，那么函数的定义（实现）是一起提升的，相当于将函数的定义放到了作用域的顶部。
+补充说明：
+	对于函数内部的变量的闭包的引用是在调用的时候发生作用，所以函数申明在定义提升到前面之后由于不是调用所以内部的变量这个时候只是申明没有定义没有任何的影响。
+*/
+(function(){
+	console.log(typeof express); //undefined, 函数表达式，只是提升了申明，没有提升定义
+	console.log(typeof declare); //function，函数申明，提升的是定义
+	var i = 1;
+	var express = function(){};
+	function declare(){};
+})();
+</script>
+</body>
+</html>	

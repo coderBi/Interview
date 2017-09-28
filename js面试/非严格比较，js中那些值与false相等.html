@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>非严格比较，js中那些值与false相等</title>
+</head>
+<body>
+<script>
+	/*
+		1）0.0 和 0没有任何区别
+		2）虽然"0" == 0但是“0” 和 “0.0”不是假值，如果放到括号中判断，结果是真。
+		3）假值与false不是完全一回事，false也是个假值。false!=undefined undefined!=0 但是他们都是假值
+		4）是否值真值与是否==false并不完全一致，例如undefined的是假值，但是undefined != false，类似的还有null,NaN。相应的,==false的并不一定可以用作假值，例如"0","0.0"（尽管他们与0相等）
+	*/
+	function equals2false(compare){
+		//判断是是否与false ==
+		if(false != compare){
+			console.log(".. " + compare + " not equals to false");
+		}else{
+			console.log(".. " + compare + " equals to false");
+		}
+		//判断是假值还是真值，这里与false == 的结果并不完全相同，应该规避这个误区
+		if(compare){
+			console.log("-- " + compare + " works as true value");
+		}else{
+			console.log("-- " + compare + " works as fasle value");
+		}
+	}
+	equals2false(undefined); //undefined是假值，但是!=false
+	equals2false(0); //0是假值，也==fasle
+	equals2false(0.0); //0.0与0是一个东西，是假值与false==
+	equals2false(""); //是假值，==false
+	//字符串类型中只有空串为假值，下面的"0" "0.0"都不是false
+	equals2false("0"); //是真值，但是==false
+	equals2false("0.0"); //是真值，但是==false
+	equals2false(null); //是假值，但!=false
+	equals2false(NaN); //是假值，但!=false
+</script>
+</body>
+</html>
