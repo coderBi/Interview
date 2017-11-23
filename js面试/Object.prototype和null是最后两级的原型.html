@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Object.prototype和null是最后两级的原型</title>
+</head>
+<body>
+<script>
+/*
+问题描述：
+	说明Object.prototype Function.prototype Array.prototype。它们的__proto__都指向了什么
+分析：
+	Function.prototype.__proto__和Array.prototype.__proto__都是Object.prototype，正是由于这个原因，所有new出来的对象都是Object的实例。Object.prototype.__proto__为null。
+*/
+console.log(Function.prototype.__proto__ === Object.prototype); //true
+console.log(Array.prototype.__proto__ === Object.prototype); //true
+console.log(Object.prototype.__proto__ === null); //ture，这里可以得到一个结论，所有的原型链的最后两级一定是Object.prototype和null
+</script>
+</body>
+</html>

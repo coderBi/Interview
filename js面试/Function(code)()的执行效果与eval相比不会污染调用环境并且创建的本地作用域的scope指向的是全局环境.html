@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Function(code)()的执行效果与eval相比不会污染调用环境并且创建的本地作用域的scope指向的是全局环境</title>
+</head>
+<body>
+<script>
+/*
+说明：
+	可以通过new Function('a,b','return a + b;')或者不用new直接Function('a,b','return a + b;')这种形式创建一个函数对象（如果只要一个参数，表示没有形参，传入的是一段代码）。不过这种形式不是很常用。在有些环境下这样使用可以替代eval()，因为eval函数会污染调用eval的上下文环境,但是Function('dosomething')()由于会创建临时环境，可以避免污染(另一个细节点是Function创建的本地作用域的scope指向的是全局环境)。
+*/
+
+(function(){
+	var v = 'hello';
+	//使用Function创建本地作用域不会污染当前这个function的环境，但是也不会引用到这个调用环境中的变量
+	Function("var f = 'function'; console.log(f); console.log('undefined' === typeof(v));")(); //打印function和true，也就是在内部是看不到v的
+	console.log('undefined' === typeof(f)); //ture，不会污染到调用环境
+
+	//使用eval可以直接引用调用上下文的变量，同样在eval中定义的变量也会对这个调用上下文构成污染
+	eval("var e = 'eval'; console.log(e); console.log('undefined' === typeof(v));"); //打印eval和false，也就是在内部是可以看到调用上下文的
+	console.log('undefined' === typeof(e)); //false，在eval中执行的代码污染到了调用环境
+})();
+console.log(Function('')); //function anonymous()
+</script>
+</body>
+</html>

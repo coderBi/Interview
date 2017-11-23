@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>使用split将可能中间有空格并用逗号隔开的字符串序列切割成数组</title>
+</head>
+<body>
+<script>
+/*
+问题描述：
+	形如"a, b , c  ,  d"的字符串，写一个算法将这个字符串切割成为数组['a','b','c','d']
+分析：
+	String.prototype.split函数传入的切割模式是可以是一个正则表达式的。这里可以传入一个/\s*,\s* /进行切割。
+*/
+
+console.log(String.prototype.split.call('a, b , c  ,  d', /\s*,\s*/));  //Array['a','b','c','d']
+</script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>实现一个extend函数，将一个对象的属性拷贝给另一个对象</title>
+</head>
+<body>
+<script>
+/*
+问题描述：
+	实现一个extend函数extend(parent,child)，将parent的属性拷贝给child
+分析：
+	for in 会访问所有的非内置属性，包括原型链上面的对象的属性。所以可以通过for in 遍历parant，然后进行属性的拷贝赋值。
+*/
+
+function extend(parent,child){
+	//利用for in遍历parent的所有属性，然后依次拷贝到child
+	for(var key in parent){
+		child[key] = parent[key];
+	}
+}
+var o1 = {
+	'name':'coder'
+};
+var o2 = {
+	'age':11
+};
+extend(o2,o1);
+console.log(o1);
+</script>
+</body>
+</html>	

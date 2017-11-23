@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+</head>
+<body>
+<script>
+	var reg = /[abc]/g; // 要进行所有匹配，应该设置全局匹配
+	var str = 'azsbcdad';
+	var result;
+	//exec如果发生不匹配返回null
+	while(null !== (result = reg.exec(str))){
+		console.log(result); //返回Array['a'] ...
+	}
+</script>
+</body>
+</html>

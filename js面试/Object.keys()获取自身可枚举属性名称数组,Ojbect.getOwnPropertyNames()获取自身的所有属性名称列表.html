@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Object.keys()获取自身可枚举属性名称数组,Ojbect.getOwnPropertyNames()获取自身的所有属性名称列表</title>
+</head>
+<body>
+<script>
+/*
+关于这两个函数：
+	Object.keys(obj): 获取一个对象自身的可枚举的属性的名称数组，不获取继承的属性
+	Object.getOwnPropertyNames(obj): 获取一个对象自身的所有的属性名称数组。包括不能枚举的属性
+---note:
+	这两个函数都值获取对象本身的属性，不会获取到原型上的属性。
+*/
+var obj = Object.create({name:'name'});
+Object.defineProperties(obj,{
+	'age': {value:11},
+	address: {value:'somewhere', enumerable: true}
+});
+//可以看到两个函数都不会获取到原型上的name属性
+console.log(Object.keys(obj)); //Array['address'] 因为age是不可枚举的所以获取不到
+console.log(Object.getOwnPropertyNames(obj)); //Array['age', 'address']
+</script>
+</body>
+</html>	

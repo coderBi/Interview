@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Array.indexOf和Array.lastIndexOf都是强类型匹配</title>
+</head>
+<body>
+<script>
+/*
+关于indexOf lastIndexOf和php中的array_search:
+	Array.indexOf()和Array.lastIndexOf()：这两个函数是获取某一个值第一次出现和最后一次出现的位置。注意这两个函数的传入参数在内部是进行强类型匹配的。也就是说Array.indexOf(1)和Array.indexOf('1')的结果可能是不同的。这也是php中的array_search()函数不同的地方。
+*/
+var arr = ['1',1,'2',2];
+console.log(arr.indexOf(1)); //1
+console.log(arr.indexOf('2')); //2
+console.log(arr.indexOf(100)); //-1
+</script>	
+</body>
+</html>	

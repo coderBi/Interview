@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>修改了函数的prototype属性导致instanceof得到的结果为false</title>
+</head>
+<body>
+<script>
+	function Foo(){
+		this.name = 'test';
+	}
+	var v = new Foo;
+	console.log("修改之前,instanceof的结果为true:");
+	console.log(v instanceof Foo);
+	console.log("修改之后,instanceof的结果为false:");
+	Foo.prototype = {};
+	console.log(v instanceof Foo); //false，因为修改了Foo的原型对象
+</script>
+</body>
+</html>

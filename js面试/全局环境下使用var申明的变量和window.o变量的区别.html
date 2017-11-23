@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>全局环境下使用var申明的变量和window.o变量的区别</title>
+</head>
+<body>
+<script>
+/*
+问题描述：
+	使用window.o和全局环境下使用var o，两者有什么区别
+分析：
+	window引用全局对象。在全局环境下通过var申明的对象都会自动的添加到window下。所以全局环境下通过var申明的变量通过window.o访问也是一样的。二者只存存在一个区别就是通过window.o直接赋值的属性可以通过delete进行删除(删除之后通过window.o访问得到undefined，也就是访问了一个对象的未定义的属性，但是如果直接访问o，会报错说明o is not defined)。但是通过var申明的全局变量不能删除。
+*/
+
+var o1 = 11;
+window.o2 = 22;
+//以下四个访问都是正常的
+console.log(window.o1); 
+console.log(window.o2);
+console.log(o1);
+console.log(o2);
+//var申明的全局变量不能删除，而window.o添加的变量可以通过delete删除
+delete o1;
+delete o2;
+console.log(o1); //11 还是可以访问，说明删除失败
+console.log(window.o2); //undefined 访问了一个对象的未定义的属性
+console.log(o2); //error: reference o2 is not defined。访问了一个未定义的变量，因为并没有内置对象o2
+</script>
+</body>
+</html>

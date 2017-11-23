@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>concat()函数不会调用的数组，并且参数可以进行多种传入</title>
+</head>
+<body>
+<script>
+/*
+问题描述：
+	关于concat函数，下面的输出结果是什么
+	var a = [1,2,'a'], b = [1,2,'b'];
+	var c = a.concat('c',b);
+	console.log(a); //不变
+	console.log(b); //不变
+	console.log(c); //先将a加到新的数组，然后将‘c’加进去，最后将数组b中的元素追加到结果中
+分析：
+	concat()函数位于Array.prototype上，其操作是返回一个新的对象，不会修改传入的数组，所以传入的数组的不会改变。concat函数可以传入多个参数，如果一个参数不是数组，就会当做一个单一元素直接添加到结果数组中，如果是数组，会遍历其中的元素，然后依次追加到结果数组中。
+*/
+
+	var a = [1,2,'a'], b = [1,2,'b'];
+	var c = a.concat('c',b);
+	console.log(a); //不变
+	console.log(b); //不变
+	console.log(c); //先将a加到新的数组，然后将‘c’加进去，最后将数组b中的元素追加到结果中
+</script>	
+</body>
+</html>

@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>js直接量对象的原型属性指向Object的原型，Object的原型上存在constructor属性</title>
+</head>
+<body>
+<script>
+/*
+	js中所有的对象直接量和直接通过new Object的效果是一样的。所以一般不会去new Object，这样看起来更麻烦。Object.prototype.constructor===Object
+note:
+	由于constructor属性是可以修改的，所以通过这个属性来判断是否是某个对象的实例是不保险的。
+*/
+
+var v = {}; //和new Object效果一样
+console.log(v.constructor);
+console.log(v.constructor === Object); //true
+</script>
+</body>
+</html>

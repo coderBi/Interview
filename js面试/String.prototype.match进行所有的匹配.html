@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>String.prototype.match进行所有的匹配</title>
+</head>
+<body>
+<script>
+/*
+	match函数传入一个正则表达式，如果有g限定符就相当于php中的pre_match_all
+*/
+console.log('abcde'.match(/([a-z])/g)); //Array['a','b','c','d','e'] 注意这个函数返回的结果数组中没有子表达式的结果，要获取子表达式对应的匹配需要程序进一步的处理
+</script>
+</body>
+</html>

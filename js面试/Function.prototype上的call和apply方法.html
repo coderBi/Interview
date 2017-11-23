@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Function.prototype上的call和apply方法</title>
+</head>
+<body>
+<script>
+	//这两个方法是存在与Function.prototype上的，被所有的函数对象共享
+	console.log(Function.prototype.hasOwnProperty('call')); //true
+	console.log(Function.prototype.hasOwnProperty('apply')); //true
+
+	//call与apply方法，call从第二个参数开始传递的是参数列表。而apply只有两个形参，第二个是用数组的形式传入所有的参数
+	console.log(Function.prototype.apply.length);  //2，只要两个形参
+	console.log(Function.prototype.call.length); //1, 因为后续的形参数量是不确定的
+</script>
+</body>
+</html>

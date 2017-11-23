@@ -1548,7 +1548,7 @@ a是0xe0, 对于表达式unsigned int b = a;所有的小于int的表达能力的
 分析：
 对于后置++和后置--都是在整个表达式计算完成之后才进行。这里的先计算 x-- 然后计算 x - x-- = 0,然后从右往左结合进行赋值x - = 0表达式的值还是x, x+=x之后x为2*x = 8。最后整个表达式计算完毕，进行一次x--，可得到x=7。
 实测修正：
-上面的分析在VS中测试是有效的，但是在GCC环境下进行测试的结果是8。这里可以做出一个解释就是在整个表达式计算完毕之后立即进行了一个x--然后又将整个表达式的值8赋给x。
+上面的分析在VS中测试是有效的，但是在GCC环境下进行测试的结果是8。个人的分析是GCC中对于表达式x += x-= x - x-- 不是一次考虑整个表达式的，是先考虑的子表达式x-= x - x--，而且这子表达式先执行了x--，之后x成了(x-1)，x - x--成了-1，所以这个子表达式的效果是x-=-1，结合前面的x--，所以x又成了原始的x。然后分析表达式x+=x得到结果8.
 
 111,下面的运算是原子操作吗： x=y  x++ ++x  x=1
 答案：
@@ -2877,3 +2877,791 @@ static_cast是不进行类型的安全性检查的，这里无论是pa到void*�
 
 
 192，01背包问题。01背包指的是所有的物品每一个重量只有一个然后要么拿要么不拿不能拿一部分。考虑如下问题，用代码求解：背包容量为5，物品1重1价值60，物品2重2价值100，物品3重3价值120。求最大价值。如果要求背包必须装满的前提下修改代码求最大价值.
+分析：
+首先考虑背包可以不装满的情况，这种情况是网络上分析的最多的问题。思路是一个递推公式用v[i][j]表示用前面i个物品填充容量j的情况下可以获取到的最大价值。那么v[i][j] =  max(v[i] + v[i-1][j-m[i]], v[i-1][j])，其中v数组代表价值，m数组存储的是每个的重量。容易知道v[0][0~最大容量]=0，v[0~最多物品][0]=0。
+在不要求最终一定装满的情况下的01背包的代码：
+	/**
+	*  获取在不保证最后一定装满的情况下01背包的最大价值
+	*
+	* @param int value[] 所有物品的价值数组
+	* @param int weight[] 所有物品的重量数组
+	* @param int number 物品的数量
+	* @param int capactiy 提供的容量
+	* @return int 返回获取到的最大价值
+	*/
+	int MaxValueWhenMayFull(int value[], int weight[], int number, int capacity){
+		assert(value && weight && number >= 0 && capacity >= 0);
+		int ** result = new int*[number + 1]; //用一个二维数组存储中间结果
+		if(!result){
+			throw "内容分配出错";
+		}
+		for(int i = 0; i <= number; ++i){
+			result[i] = new int[capacity + 1]();
+			if(!result[i]){
+				for(int j = 0; j < i; ++j)
+					delete[] result[j];
+				delete[] result;
+				throw "内容分配出错";
+			}
+		}
+		//使用递归公式，进行“填表”
+		for(int i = 1; i <= number; ++i){
+			for(int j = 1; j <= capacity; ++j){
+				if(weight[i-1] <= j)
+					result[i][j] = value[i-1] + result[i - 1][j - weight[i-1]];
+				result[i][j] = std::max(result[i][j], result[i-1][j]);
+			}
+		}
+		int toReturn = result[number][capacity]; //使用number个物品填充capacity的容量
+		//释放内部空间
+		for(int j = 0; j <= number; ++j)
+			delete[] result[j];
+		delete[] result;
+		return toReturn;
+	}
+接着分析，在保证最后背包一定要装满的情况。首先考虑递推公式，原来的递推公式v[i][j] =  max(value[i-1] + v[i-1][j-weight[i-1]], v[i-1][j]依然是实用的，这个时候v[i][j]表示使用i个商品填满j的容量的最大价值。由于递推公式是一样的，那么只需要修改递推的初始条件。可以知道v[1~最大物品数][0]=0这个时候是装满的。而v[0][1~最大容量]=-INFINITY, 这里的意思是将没有装满的情况的价值设置为负无穷，而负无穷加上任何非无穷的数据还是负无穷（实际意义因为value[i-1] + v[i-1][j-weight[i-1]]在v[i-1][j-weight[i-1]]=-INFINITY的时候表示的依然是没有装满的状态）。通过上面的分析，对于保证必须装满的条件分析，只需要修改初始的递推条件和增加加法的额外判断就可以在原来的不需要装满的01背包的代码基础上完成保证装满条件下的01背包的代码
+在保证背包一定要装满的前提下，实现01背包的代码：
+	/**
+	*  获取在最后一定装满的情况下01背包的最大价值
+	*
+	* @param int value[] 所有物品的价值数组
+	* @param int weight[] 所有物品的重量数组
+	* @param int number 物品的数量
+	* @param int capactiy 提供的容量
+	* @return int 返回获取到的最大价值
+	*/
+	int MaxValueWhenMustFull(int value[], int weight[], int number, int capacity){
+		assert(value && weight && number >= 0 && capacity >= 0);
+		int **result = new int*[number + 1];
+		const int INFINITY = std::numeric_limits<int>::min(); //最大负数，用来保存没有装满的时候的价值
+		if(!result)
+			throw "内存分配出错";
+		for(int i = 0; i <= number; ++i){
+			result[i] = new int[capacity + 1]();
+			if(!result[i]){
+				//释放已经分配的空间
+				for(int j = 0; j < i; ++j)
+					delete[] result[j];
+				delete[] result;
+				throw "内存分配出错";
+			}
+		}
+		//将传入的
+		//将result[0][1~最大容量设置为INFINITY
+		for(int i = 1; i <= capacity; ++i){
+			result[0][i] = INFINITY;
+		}
+		//递推填表
+		for(int i = 1; i <= number; ++i){
+			for(int j = 1; j <= capacity; ++j){
+				if(weight[i-1] <= j)
+					result[i][j] = (INFINITY == result[i-1][j-weight[i-1]] ? INFINITY : result[i-1][j-weight[i-1]] + value[i-1]);
+				result[i][j] = std::max(result[i][j], result[i-1][j]);
+			}
+		}
+		int toReturn = result[number][capacity];
+		//释放内部空间
+		for(int i = 0; i <= number; ++i)
+			delete[] result[i];
+		delete[] result;
+		return toReturn;
+	}
+note:
+在考虑这个问题的时候，一开始分析递推公式的时候认为应该将传入的物品按照重量排序。后来发现这可能是现实中的一个错觉。实际上不用排序因为递推公式进行填表的时候囊括了所有的物品和容器的排列组合
+
+
+193，部分背包问题：01背包形象的将每一个物品描述成了一个完整的不可拆卸的整体，要么都拿走要么完全不拿。而部分背包是将所有物品形象描述为一袋一袋的金粉，可以拿一部分。这种情况下应该如何做到价值最大。
+答案：
+一直按“密度”最大拿物品，一直拿到容器填充完成。部分背包的递推是贪婪的，而01背包却只能用动态规划做决策，因为在01背包的情况下没有办法决定最开始拿的最优最后一定用的上：例如如果一开始拿一个密度最大的，那么可能由于容器容量限制导致不是最终的最优。
+实际书写代码：
+	/**
+	*  获取部分背包问题的最大价值
+	*
+	* @param int value[] 所有物品的价值数组
+	* @param int weight[] 所有物品的重量数组
+	* @param int number 物品的数量
+	* @param int capactiy 提供的容量
+	* @return int 返回获取到的最大价值
+	*/
+	int MaxValueWhenWeightCanBeResolved(int value[], int weight[], int number, int capacity){
+		assert(value && weight && number >= 0 && capacity >= 0);
+		//按密度进行排序，这里在内部排序索引数组，而不是操作传入的两个数组，这也是符合一般的使用情况的。例如现实情况可能是更多组的更庞大的数据集合，一般不应该直接操作原来的数据。而且这里涉及到两个数组，而关联它们的是索引，所以进行索引标号排序是最合适的逻辑
+		int *indexes = new int[number](); //用来保存所有物品的索引标号
+		float *densities = new float[number](); //保存所有的物品的密度
+		if(!indexes || !densities){
+			delete[] indexes;
+			delete[] densities;
+			throw "内存分配出错";
+		}
+		for(int i = 0; i < number; ++i){
+			indexes[i] = i;
+			densities[i] = (float)value[i] / weight[i];
+		}
+		//进行索引数组按照“密度”从大到小的排序 这里为了保证代码的效率和代码的内联，采用了希尔排序
+		for(int step = number / 2; step > 0; step *= 2){
+			for(int i = step; i < number; ++i){
+				int index = indexes[i], density = densities[i], j;
+				for(j = i; j - step >= 0 && density > densities[j - step]; j -= step){
+					//将密度较小的元素后移
+					densities[j] = densities[j - step];
+					indexes[j] = indexes[j - step];
+				}
+				densities[j] = density;
+				indexes[j] = index;
+			}
+		}
+		int result = 0;
+		//按密度从大到小装入容器
+		for(int i = 0; i < number && capacity > 0; ++i){
+			if(capacity > weight[indexes[i]]){
+				result += value[indexes[i]];
+				capacity -= weight[indexes[i]];
+			}else{
+				result += round(capacity * densities[i]); //最终的结果进行四舍五入
+				capacity = 0;
+			}
+		}
+		//释放内部空间
+		delete[] indexes;
+		delete[] densities;
+		return result;
+	}
+
+
+194，完全背包问题：在每种物品的数量是无穷的情况下问题背包问题的最大价值
+分析：
+
+
+195，过桥问题：a、b、c、d四个人过桥的时间分别为1、2、5、10，现在只要一个手电筒，如果两个人同时过桥那么过桥时间是较慢的那个。应该如何安排过桥使得整体的过河时间为最短。
+分析：
+在经典的过桥问题中，是只有两个人可以同时过河。因为只有一个手电筒，那么必须有一个过了河的人回来送手电筒。考虑到松手电筒的一定是过了河的速度较快的，那么问题可以转变为先将最慢的两个人送过河，然后将余下的人送过河(同样的子问题)，之所以是送两个人过河为一个步骤，因为两个最慢的如果和集体中其他的人时间相差很大，那么这两个人同时过河可以明显的缩短整体的时间，可是如果他们和其他的成员的过河时间相差不是很大，那么有可能一直用最快的送两者过河的时间会出现更优(因为缩减了两次的返回时间，两次返回的都是第一快)。例如设最快的时间依次为x,y，而最慢的依次为m,n，其中x < y < m < n。那么上面的描述的两种的用时在最慢的两个同时过桥的时候是y + x + n + y，在一直用最快的送二者过桥的时候是 m + x + n + x。两个时间相减为2y - x -m。上面的的描述是一个贪婪的过程，也就是每一次都送最慢的两个人过河。
+贪婪决策之过桥问题：
+	/**
+	* 获取过桥问题的最小时间。这里的过桥每次最多两人，只有一个手电筒。
+	*
+	* @parem int times[] 所有人的过桥时间数组
+	* @param int number 人数
+	* @param bool sorted = false 是否传入的时间数组已经排好序，默认是false
+	* @exception string 内部分配空间出错
+	* @return int 返回过桥的最短时间
+	*/
+	int MinTimeCrossTheBridge(int times[], int number, bool sorted = false){
+		assert(times && number > 0);
+		int *_times = times; 
+		//如果传入需要进行排序，那么在内部进行数组拷贝，不去直接操作原数组
+		if(!sorted){
+			_times = new int[number];
+			if(!times)
+				throw "内部空间分配出错";
+			memcpy(_times, times, number * sizeof(int)); //是C函数，C中没有命名空间，所有函数都在全局空间中
+			//排序_times
+			std::sort(_times, _times + number);
+		}
+		if(number < 3)
+			//只需要一趟就过完了，所以返回最慢的时间就行
+			return _times[number - 1];
+		if(number == 3){
+			//只要三个人，那么只要一种情况就是使用最快的松另外两个过桥
+			return _times[2] + _times[0] + _times[1];
+		}
+		int result = std::min(_times[1] + _times[0] + _times[number - 1] + _times[1],
+								_times[number - 1] + _times[0] + _times[number - 2] + _times[0]
+							) +
+							MinTimeCrossTheBridge(_times, number - 2, true);
+		//内部空间释放
+		if(!sorted)
+			delete[] _times;
+		return result;
+	}
+
+
+196，子序列和最大值问题：一个数组的各个子数组中所有的元素的和构成各个子序列的和，求所有子序列和的最大值。
+分析：
+这个问题是非常常见的题目。网络上有多种版本的算法，在数据结构和算法的书籍上也可以见到这个问题的分析。主要的有n * n * n的暴力求解、n * n的简单优化(优化的部分是每一个起点往后依次求和，每次求和可以用上前面已经有的求和结果)、n * log(n)的分治(取出一个中间元素，不包括这个元素的左边求出最大右边求出最大，包括这个元素的时候依次往左累加计算最大，依次往右累加加上最大然后将变量的值加上这个中间值构成中间最大)、最简洁的却没有简单数学证明的一次遍历O(n)算法。
+下面是O(n)的求解最大子序列和的算法：
+	/**
+	* 求解最大子序列和，算法复杂度O(n)
+	*
+	* @param int input[] 输入的待求解的数组
+	* @param int length 输入数组的长度
+	* @return int 返回最大子序列和
+	*/
+	int MaxSubsequencePlus(int input[], int length){
+		assert(input && length >= 0);
+		int result = 0, sum = 0;
+		for(int i = 0; i < length; ++i){
+			sum += input[i];
+			if(sum < 0)
+				sum = 0;
+			if(sum > result)
+				result = sum;
+		}
+		return result;
+	}
+	
+
+197，不使用递归，实现单向链表的反序
+分析：
+单向链表的反序，如果使用递归，是先将head->next反序，然后将head追加到这个反序结果的最后面。如果不使用递归，那么可以保留一个prev记录下一次操作节点要重置的next属性，然后遍历整个链表，依次重置整个链表所有节点的next属性即可。
+递归算法：
+	typedef int ElementType;
+	typedef struct Node{
+		ElementType value;
+		Node* next;
+	} *PNode;
+
+	/**
+	* 使用递归进行单向链表的反序
+	*
+	* @param PNode head 要反序的链表的头
+	* @return PNode 返回反序之后的新链表的头
+	*/
+	PNode ReverseUseRecursion(PNode head){
+		if(!head || !head->next)
+			return head;
+		PNode next = head->next, subLink = nullptr;
+		subLink = ReverseUseRecursion(next); //获取除了头节点的后续子链表的反序
+		//将头结点添加到最终的结果上
+		next->next = head;
+		head->next = nullptr;
+		return subLink;
+	}
+非递归反序算法：
+	/**
+	* 不使用递归进行单向链表的反序
+	*
+	* @param PNode head 要反序的链表的头
+	* @return PNode 返回反序之后的新链表的头
+	*/
+	PNode ReverseNoRecursion(PNode head){
+		PNode prev = nullptr, next = head, tmp = nullptr;
+		while(next){
+			tmp = next->next;
+			next->next = prev;
+			prev = next;
+			next = tmp;
+		}
+		return prev;
+	}
+
+
+198，如果只知道一个单向链表中的非头非尾的中间结点，写一个算法，从链表中删除这个节点。
+分析：
+因为是中间节点，可以巧妙的将这个节点和其后续节点的内容进行互换(又因为后序节点要删除，所以这种互换只需要将后序节点的内容赋给当前节点)，然后再删除后续的那个节点，这样将当前的节点的next重置就完成了删除。考虑这个算法可以发现如果传入的节点是尾节点或者是null，那么这个算法是没有办法正常工作的。题目中已经说了传入的非头非尾，保证了算法的可行性。
+代码：
+	struct Node
+	{
+		int data;
+		Node * next;
+	};
+
+	/**
+	* 在只知道一个非头非尾的中间节点的情况下，删除这个节点
+	*
+	* @param Node * item  要删除的节点
+	* @return bool  成功删除一个元素返回true 否则返回false
+	*/
+	bool DeleteMiddle(Node * item){
+		if(!item || !item->next)
+			return false;
+		Node * next = item->next;
+		item->data = next->data;
+		item->next = next->next;
+		delete next; //删除后续节点
+		return true;
+	}
+	
+
+199，快慢指针与单向链表有环判定：一个单向链表，里面可能存在环，如果进行判定。如果存在环如果找到环的入口
+分析：
+下面给出网络上和各种书籍上关于使用快慢指针的一般性分析：
+	使用一个快指针，每一次走两步，使用一个慢指针，每一次走一步。如果快指针达到了NULL那么说明没有环，否则如果快指针与慢指针在随后的移动过程中相遇那么说明这个链表有环。如果存在环，就将其中一个指针移到链表头，然后将两个指针都设置为步长为1，当两个指针再次相遇的时候就是入口。
+其次是个人关于快慢指针的补充说明分析：
+	1）一个链表如果有环，而且又是单向的，那么从环的入口开始，后续的所有节点都在环内。可以很容易得知，最大的环就是一个循环链表。如果有环，那么快指针先进入环内进行循环。从慢指针第一次进入环内进行分析，此时快指针无论位于环内的任何位置，可以考虑为接下来形成了快指针在环内对慢指针的一次追赶。又因为快指针每一次两步，而慢指针每一次一步，那么每一次移动实际上是快指针向着慢指针的方向多行进了1。由于当慢指针再次回到环的入口的时候刚好走了一圈，而快指针会刚好走了两圈。结合上面的追赶分析，每次追赶一步，那么在这一圈的过程中，快指针(走了两圈)一定会追上并与慢指针(走了一圈)重合过（由于每一次只是追赶一步，在第一次相遇之后，下一次相遇时慢指针刚好又走了一圈，所以这里可以得到在慢指针走的第一圈中有且仅有一次与快指针的相遇）
+	2）关于快指针，为何步长为2，是不是可以为其他的步长。假设如果慢指针为1，快指针为3，那么每次追赶会是2步，这就有了一个问题，也就是快指针与慢指针不一定相遇，可能会出现跨过慢指针而跑到慢指针前面去。一个简单的例子，环长度为2，慢指针进来的时候，快指针在入口之外的另一个点，那么如果设置的步长为1和3，会出现快指针和慢指针永远不可能相遇的情况(因为快指针每次移动3，模上2实际上可以认为和慢指针一样每次只走了1)。进一步的分析，可以发现只要设置步长之差为1就可以满足快慢指针的使用要求(因为步长相差为1的两个数模上圈长只有在圈长为1的时候才是相同的结果，而圈长为1表示快慢指针始终重合)。所以说实际使用中为了方便设计了最简单的步长为1的组合：慢指针为1，快指针为2.
+	3）关于环入口判定证明：假设在快慢指针第一次相遇的时候慢指针在环外走了x步在环内走了y步，环的长度为l，快指针已经在环内走了n圈，那么慢指针一共走了x + y步，快指针已经走了2 * (x + y)步。可以得到 2 * （x + y） = x + nl + y。nl = x + y。这个公式指出如果将一个指针返回链表起始点，另一个指针在这个相遇点，二者都设置为步长为1，当圈内的指针走了n圈之后，那么圈外面的指针恰好运动到这个相遇点，也就是说二者又会在这个相遇点重新相遇。结合前面步长都设置为1，那么这两个指针由于在这个相遇点重新相遇，很容易分析出，这个相遇点向后退y，又是环的入口处，二者也是相遇的。所以如果在有环的前提下，可以将其中一个指针移动到链表的起点然后将两个指针的步长都设置为1，当二者第一次相遇的时候就是环的入口。
+实操代码：
+	/**
+	* 判定一个单向链表是否存在环，如果存在环就返回环入口指针
+	*
+	* @param PNode head 要判断的链表
+	* @return PNode 返回环的入口，如果不存在环就返回nullptr
+	*/
+	PNode IsLoop(PNode head){
+		if(!head)
+			return nullptr;
+		PNode slow = head, fast = head; //慢指针、快指针
+		while(fast && fast->next){
+			slow = slow->next;
+			fast = fast->next->next;
+			if(slow == fast){
+				//快慢指针相遇代表有环,寻找环入口
+				slow = head;
+				while(slow != fast){
+					slow = slow->next;
+					fast = fast->next;
+				}
+				return slow;
+			}
+		}
+		//快指针退出了循环，走到了链表的末尾，说明没有环，返回nullptr
+		return nullptr;
+	}
+
+
+200，给出一个单向链表，如果通过快慢指针操作寻找其中的中位数或者是寻找倒数第K个元素。
+分析：
+对于寻找中位数，可以用一个快指针设置为步长为2，一个慢指针设置为步长为1，这样当快指针为null或者是快指针的next为null的时候慢指针就指向了中位数。这个结果分析如下：假设快指针停止的时候慢指针走了x步，如果快指针停止的时候快指针本身是null，那么一共存在节点1+2x-1，这个时候慢指针停在了1+x的位置，可以得到这种情况下总的节点数的是偶数，这个时候慢指针的前一位是中位数。另一种情况，如果快指针停止的时候快指针的next为null，那么总的节点数1+2x,而慢指针停在了1+x的位置，所以慢指针这个时候返回的就是中位数。对于总的节点数是偶数的情况，上面指出多移动了一次慢指针，而单向链表中指针回倒是麻烦的，一个简单的方法是在循环的时候记录下慢指针的前一个节点。
+寻找中位数的代码：
+	typedef struct Node
+	{
+		int data;
+		Node * next;
+	} *PNode;
+
+	/**
+	* 获取一个单向链表的中位数
+
+	* @param PNode head 要获取中位数的链表
+	* @return PNode 返回中位数的指针，如果链表是空的就返回nullptr
+	*/
+	PNode GetMedian(PNode head){
+		PNode slow = head, fast = head, pre = head; 
+		while(fast && fast->next){
+			pre = slow; //记录下慢指着的前一个元素
+			fast = fast->next->next;
+			slow = slow->next;
+		}
+		if(!fast)
+			return pre; //快指针最后到了null，说明链表节点数为偶数，这个时候返回的是慢指针最终位置的前一个节点
+		return slow;
+	}
+	
+对于寻找倒数第K的元素，我们可以用两个步长为1的指针看，第一个指针先走K步，如果在这之前这个指针到达了null说明一共存在的元素不到K个。当第一个指针走了k步之后，然另一个指针从链表的起始位置开始走，然后在第一个指针到达null的时候另一个指针停在的位置就是倒数第K个元素（两个指针一直相差K，而其中一个停在了null，可以从null假设为0往回数K）。
+寻找倒数第K个元素的代码：
+	/**
+	* 获取一个单向链表中的倒数第K个 元素
+	*
+	* @param PNode head 要获取中位数的链表
+	* @param int k 要获取的位置k
+	* @return 返回倒数第K个元素，如果整个链表的长度不足K那么会返回nullptr
+	*/
+	PNode GetLastKElement(PNode head, int k){
+		PNode slow = head, fast = head;
+		int i = 0;
+		while(i < k && fast){
+			i++;
+			fast = fast->next;
+		}
+		if(i < k){
+			//整个链表的长度是小于K的
+			return nullptr;
+		}
+		while(fast){
+			slow = slow->next;
+			fast = fast->next;
+		}
+		return slow;
+	}
+
+
+201，两个单向链表，如何判定这两个链表是否存在相交。如何寻找它们的交点。
+分析：
+由于是单向链表，那么一旦在一个点相交了，那么后续这两个链表也就是完全一样的了。这里如果不考虑链表中存在环的情况，那么可以先获取到两个链表的长度，然后让较长的链表的指针从头走到与短链表一样长的地方，然后两个链表同时向后遍历，如果某一个节点相同了，那么这个节点就是两个链表的交点，如果这两个链表不相交那么他们的交点会是最后的NULL。
+下面分析链表如果出存在环的情况。首先，如果一个链表存在环，另一个链表不存在环，可以很容易通过反证法得到这两个链表一定是不相交的（因为一个链表是到不了null的而另一个会到达末尾的null）。那么两个链表如果相交并且有环，那么它们必定都是有环的。因为是单向链表，一旦进入环就出不来，所以两个链表只能共用一个环。判断两个有环的链表是否相交可以在一个链表中查找另一个链表的环入口节点，如果相交由于共用一个环所以必然找得到该节点，如果找不到那么就两个有环链表就不相交。紧接着分析，这两个链表进入环的入口节点是否一样又可以进行两个分析，如果两个链表入环点是一样的，那么可以从这个入环点向回倒退一直找到二者第一个相同的节点为两个链表的交点。如果两个链表的入口节点不一样，那么很容易得到在入环之前二者是没有重合的节点的。这个时候二者所有的交点都在环内，根据实际情况可以返回其中一个入环点为二者的交点。
+补充：
+如果发现两个链表都是有环的并且环的入口是一样的，那么这种情况返回的交点可能在环的外面，这种情况可以以环的入口为尾部，然后从两个头部到这个尾部可以看做是两个无环的链表相交交点分析。
+代码：
+	struct Node
+	{
+		int data;
+		Node * next;
+	};
+
+	/*这个结构体用于保存一个链表的环的入口和入口到链表起始点的距离。如果一个链表无环，入口点应该保存为null，距离应该为链表的长度*/
+	struct PointAndLen
+	{
+		Node * point;
+		int length;
+	};
+
+	/**
+	* 获取一个链表的环的入口和入口到链表头的距离，如果链表无环，那么入口返回的是null，而距离返回的是链表的长度
+	* @param Node* head  参与计算的链表
+	* @return PointAndLen 获取到的环入口和入口到头节点的距离.
+	*/
+	PointAndLen GetPointAndLen(Node * head){
+		PointAndLen toReturn = {nullptr, 0};
+		Node * slow = head, *fast = head;
+		//寻找环的入口
+		while(fast && fast->next){
+			fast = fast->next->next;
+			slow = slow->next;
+			if(slow == fast){
+				//有环
+				slow = head;
+				while(slow != fast){
+					slow = slow->next;
+					fast = fast->next;
+				}
+				break;
+			}
+		}
+		if(fast && fast->next){
+			toReturn.point = slow; //交点
+		}else{
+			toReturn.point = nullptr;
+		}
+
+		//计算交点到链表起始点的距离
+		while(head != toReturn.point){
+			head = head->next;
+			toReturn.length++;
+		}
+		return toReturn;
+	}
+
+	/**
+	* 获取两个单向链表的交点
+	* @param Node* link1 单向链表1
+	* @param Node* link2 单向链表2
+	* @return Node* 返回两个链表的交点
+	* @note 如果不相交，会返回null
+	*/
+	Node* GetIntersectionOfLinks(Node* link1, Node* link2){
+		PointAndLen pl1 = GetPointAndLen(link1),
+					pl2 = GetPointAndLen(link2);
+		Node * toReturn = nullptr;
+		if(!pl1.point && !pl2.point){
+			//两个都无环情况
+			Node * ptr1 = link1, * ptr2 = link2;
+			int sub;
+			if(pl1.length > pl2.length){
+				//链表1更长一些，让链表1先移动一段距离
+				sub = pl1.length - pl2.length;
+				for(int i = 0; i < sub; ++i)
+					ptr1 = ptr1->next;
+				
+			}else{
+				//链表2更长一些
+				sub = pl2.length - pl1.length;
+				for(int i = 0; i < sub; ++i)
+					ptr2 = ptr2->next;
+			}
+			//两个链表视为等长的时候同时向后移动两个指针
+			for(; ptr2 != ptr1; ptr2 = ptr2->next, ptr1 = ptr1->next){}
+			toReturn = ptr2;
+		}else if(pl1.point && pl2.point){
+			//两个都有环情况
+			if(pl1.point == pl2.point){
+				//两个的环的入口是一样的，这个时候，可以将环的入口当做尾节点，对两个链表进行类似于无环相交的分析
+				int sub;
+				Node * ptr1 = link1, *ptr2 = link2;
+				if(pl1.length > pl2.length){
+					//链表1的起始点距离环的入口更远一些
+					sub = pl1.length - pl2.length;
+					for(int i = 0; i < sub; ++i){
+						ptr1 = ptr1->next;
+					}
+				}else{
+					//链表2的起始点距离环的入口更远一些
+					sub = pl2.length - pl1.length;
+					for(int i = 0; i < sub; ++i){
+						ptr2 = ptr2->next;
+					}
+				}
+				for(; ptr2 != ptr1; ptr1 = ptr1->next, ptr2 = ptr2->next){}
+				toReturn = ptr1;
+			}else{
+				//两个环的入口不一致，通过反证法可以知道这两个链表中的环一定是同一个。那么在两个链表入环之前是不可能产生相交的。所以这个时候可以返回任意一个链表的入口作为相交点
+				//在一个链表上查找另一个链表的入口点，如果找到了就表示二者相交，否则它们不相交
+				bool found = false;
+				for(Node * ptr = pl1.point->next; ptr != pl1.point; ptr = ptr->next){
+					if(ptr == pl2.point){
+						found = true;
+						break;
+					}
+				}
+				if(found)
+					//返回其中一个链表的入口当做相交点
+					toReturn = pl1.point;
+				else
+					toReturn = nullptr;
+			}
+		}else
+			//一个有环一个无环，这种情况下两个链表不可能相交，所以结果是null
+			toReturn = nullptr;
+		return toReturn;
+	}
+
+
+
+
+202，单向链表相交判定的应用：网页爬虫的原理是从一个入口的网页开始查找这个网页中所有的url，然后紧接着查找下一个url中包含的url。这个查找的结束条件是查找某一个页面的时候发现其中所有的页面都已经被查过了或者是某一个页面中不包括任何的url了。现在简化问题为一个页面只能包含一个url，爬虫通过爬两个入口网页形成了两个链表，如何判定这两个链表中是否存在相同的url。
+分析：
+两次组成的链表内存结构是分开的，也就是物理上next不是有环无环的依据。链表中有一个url属性是这个页面上存放的url，这个url可能为空。所以实际分析链表的相交性主要是集中在url属性上。同一般性的链表相加分析一样，首先如果两个链表是无环的（这里的有环无环是相对于url属性的）那么爬虫在两次走到相同的url之后接下来链表节点中的url属性都是一样的，通过这个分析可以知道两个链表中的最后一个节点的url属性是一样的。上述的分析是判断无环的两个链表相交的，如果有环相交，和一般性判断一样二者要想相交一定都是有环的，而且一定是有一个相同的环(因为是单向链表，进入一个环就不能出来再进入另一个环)。可以很容易的分析得到两个链表的尾部节点一定都在环上，所以在存在环的时候可以在一个链表中查找另一个的尾节点，如果找到就表示有环相交，如果没有找到就不可能相交。
+上面尽管分析了两种情况，但是仔细分析可以发现可以通过一个操作合并两种分析，那就是先找到一个链表的尾部节点，然后在另一个链表中寻找这个尾部节点，如果是在另一个链表的非尾部找到了，我们可以通过反证法知道原先的尾部节点所在的链表一定是构成了环的，二者有环相交。如果是在另一个链表的尾部找到，那么可以认为是两个无环链表相交（其实也可能是相同的环入口相交，这是一个临界情况）。
+实测代码：
+	struct URLNode
+	{
+		std::string url;
+		URLNode * next;
+	};
+
+	/**
+	* 判断两次爬虫构成的链表中是否存在重合的url
+	*
+	* @param URLNode * list1 爬虫采集到的链表1
+	* @param URLNode * list2 爬虫采集到的链表2
+	* @return bool 如果两个链表中存在相同的url就返回true 否则返回false
+	* @note 通过内部详细的分析，只需要在一个链表中寻找另一个链表的尾节点url，如果找到了就是相交的，这包括了有环相交和无环相交
+	*/
+	bool IsIntersected(URLNode * list1, URLNode * list2){
+		if(!list1 || !list2)
+			return false;
+		URLNode * tail1 = list1;
+		//寻找第一个链表的尾节点
+		while(tail1->next)
+			tail1 = tail1->next;
+		//在另一个链表中寻找尾节点的url
+		for(URLNode * p = list2; p != nullptr; p = p->next){
+			if(p->url == tail1->url)
+				return true;
+		}
+		return false;
+	}
+
+
+203，一个单向循环链表，设计一个算法去除连续的重复元素。
+分析：
+首先从头到尾（这里指的是下一次回到头之前）遍历，如果后一个元素和前面的元素的内容重复就删除后一个元素，这里存在两个指针，一个保存前一个元素一个保存后一个元素。如果进行了后一个元素的删除，那么前一个元素的指针维持不变，否则两个指针都会进行后移。
+其次，一直删除到最后一个元素，再次回到头节点的时候，如果最后一个元素的内容与头结点重复了，那么会删除头结点，然后整个链表返回的头结点发生了改变。这个时候如果要保留返回的头结点不变，而是删除最后一个重复元素，可以知道由于是单向链表，需要保留删除的尾节点的前一个元素，而这种保留对于之前遍历去重操作来说是不一致的，是麻烦的。所以总体来看，这里如果是尾节点和头结点重复了，最方便的做法是删除头结点。
+代码：
+	typedef struct Node
+	{
+		int data;
+		Node * next;
+	} *PNode;
+
+
+	/**
+	* 去除一个单向循环链表中的连续重复元素
+	*
+	* @param PNode link 要删除的链表
+	* @return PNode 返回删除之后的循环链表
+	*/
+	PNode RemoveDuplicate(PNode link){
+		if(!link)
+			return link;
+		PNode p = link, q = link->next, tmp = nullptr; //分别为前一个元素，后一个元素
+		while(q != link){
+			tmp = q->next;
+			if(q->data == p->data){
+				//去重，删除后续元素
+				delete q;
+				p->next = tmp;
+			}else{
+				p = q;
+			}
+			q = tmp;
+		}
+		//q为传入的头节点，p为尾部节点，处理这种特殊情况
+		if(q == p){
+			//特殊情况，q和p重合了，表示这个链表中原先所有的元素都是一样的
+			return p;
+		}
+		if(q->data == p->data){
+			p->next = q->next;
+			delete q;
+			return p;
+		}
+		return link; //返回传入的头结点
+	}
+
+
+204，一个链表中每一个节点，除了保存一个后续元素的指针，还保存一个链表中的其他的元素的指针。对于这样的结构的链表，设计一个算法进行链表的拷贝。
+分析：
+构建新的链表，可以依次遍历原来的链表，进行节点的拷贝和next指针的赋值，但是这里出现的一个问题是节点中存在的另一个指针可能指向了还没有构建出来的节点上，所以拷贝不能一步完成。考虑在创建完成拷贝链表的所有节点的情况下，如果依次遍历这个拷贝链表然后进行另一个指针的赋值，那么从原链表中的关系映射查找会出现一个二次复杂度的算法。如果在创建拷贝的链表的过程中，保留原节点和拷贝节点之间的映射关系为hash结构。这样可以将复杂度降为线程。
+实际上，在相关的书上可以找到不使用hash进行额外的空间开销也能实现线性的拷贝。方法是这样的，我们在拷贝节点的时候直接将每一个节点插入到原来的链表中的相应的节点的后面。这样就实现了一个类似的简单映射。在创建完成所有的节点拷贝节点之后，依次使用映射关系对拷贝节点的“另一个指针”进行赋值。然后，我们可以将所有的奇数位重组为原链表，而所有的偶数位重复为拷贝的结构(这里的重组指着的是重写修改每一个节点的next)。
+代码：
+	typedef struct Node
+	{
+		int data;
+		Node * next;
+		Node * sibling; //另一个指针，保留链表中的任意节点的指针
+	} *PNode;
+
+	/**
+	* 拷贝一个指定格式的链表，这个链表中每一个节点除了拥有后续节点的指针还有一个指向其他任意元素的指针
+	*
+	* @param PNode src 要拷贝的链表
+	* @return PNode 拷贝得到的链表
+	*/
+	PNode CopyList(PNode src){
+		if(!src)
+			return nullptr;
+		PNode p = src, q;
+		//节点拷贝
+		while(p){
+			q = new Node;
+			//将拷贝的节点插入到原节点的后面
+			q->data = p->data;
+			q->next = p->next;
+			p->next = q;
+			p = q->next;
+		}
+		//调整拷贝的节点的另一个指针
+		for(p = src; p;){
+			q = p->next; // 拷贝节点
+			q->sibling = p->sibling->next;//映射关系
+			p = q->next;
+		}
+		//调整next指针，将拷贝链表和原链表进行分离
+		PNode toReturn = src->next;
+		for(p = src; p; p = p->next){
+			q = p->next;
+			p->next = q->next;
+			if(q->next)
+				q->next =  q->next->next;
+		}
+		return toReturn;
+	}
+
+
+205，栈的应用之后缀表达式：如何将一个中缀表达式转换为后缀表达式。一个后缀表达式，如何计算值。
+分析：
+后缀表达式的好处是完全不需要使用括号。后缀表达式是波兰人提出因此也称为逆波兰式。后缀表达式的计算可以使用一个栈，扫描表达式如果遇到了操作数就压入栈，如果遇到了操作符就从栈中取出两个操作数计算结果并且将结果重新压入栈。当整个表达式扫描结束的时候最后栈中留下的就是最终的结果。
+关于中缀表达式转换后缀表达式：
+如果这个问题出在面试笔试中，可以使用一种加括号的方法，首先在中缀表达式上对不同优先级加上所有的括号，然后再将所有的操作符移到括号的后面，最后去掉所有的括号，就得到了所求的后缀表达式。例如 a+b*c+(d*e+f)*g，这个中缀加上括号的形式是((a + (b*c)) + (((d*e) + f)*g))，将所有操作符移动到括号的外部并且去掉括号为abc*+de*f+g*+。另一种在笔试中常见的方法是将中缀表达式对应的语法二叉树画出来，然后对这个树进行直接写出后缀。
+这个问题如果是要代码求解，那么一般可以使用两个栈，一个用来存放扫描到的操作符，另一个存放最终的结果(准确的说，这个结果是倒的)。当扫描到操作数的时候直接存入到结果栈中，当扫描到操作符的时候，如果操作符是左括号，那么直接入栈，如果是右括号就将所有的读到了左括号之前的操作符都压入结果栈，左括号出栈丢弃(实际上一对括号包裹的是一个同样的子问题)。对于操作符的优先级，如果读到的操作符的优先级比操作符栈中的更低或者一样那么要先计算前面的表达式，然后才能将当前的操作符入栈。
+使用两个栈进进行转换的代码如下：
+	/**
+	* 将一个中缀表达式的字符串转换为后缀表达式的字符串
+	*
+	* @param std::string str 传入的中缀表达式字符串
+	* @return std::string 获取到的后缀表达式字符串
+	*/
+	std::string InOrder2Post(std::string str){
+		std::string toReturn;
+		stack<char> op, result;
+		map<char,int> priorities; //存放所有的操作符对应的优先级
+		priorities['(']  = 0; //优先级最低
+		priorities['+'] = priorities['-'] = 1;
+		priorities['*'] = priorities['/'] = priorities['%']  = 2;
+
+		//扫描
+		auto end = str.end();
+		char c;
+		for(auto it = str.begin(); it != end; ++it){
+			c = *it;
+			switch(c){
+				case '(':
+					//左括号，直接压入操作符栈
+					op.push(c);
+					break;
+				case ')':
+					//将一对括号中还没有出栈的符号全部弹出，最后丢弃前面的左括号
+					while(op.top() != '('){
+						result.push(op.top());
+						op.pop();
+					}
+					//弹出左括号
+					op.pop();
+					break;
+				case '-':
+				case '+':
+				case '*':
+				case '/':
+				case '%':
+					//是符号，那么将栈顶比当前符号优先级更高或者一样的符号先进行运算
+					while(!op.empty() && priorities[op.top()] >= priorities[c]){
+						result.push(op.top());
+						op.pop();
+					}
+					//将当前的操作符压入操作符存储栈
+					op.push(c);
+					break;
+				default:
+					//是操作数，直接入结果栈
+					result.push(c);
+					break;
+			}
+		}
+		//将操作符栈中还没有出栈的所有的操作符出栈
+		while(!op.empty()){
+			result.push(op.top());
+			op.pop();
+		}
+		//将结果栈中字符依次读出，构成结果字符串
+		while(!(result.empty())){
+			toReturn.push_back(result.top());
+			result.pop();
+		}
+		//将结果字符串翻转，因为栈中存放的结果读取到的是反的
+		reverse(toReturn.begin(),toReturn.end());
+		return toReturn;
+	}
+
+
+206，栈和队列有何异同。
+二者都是线性存储结构。但是栈只能在一端进行插入和删除，而队列规定只允许在一端插入(队尾)在另一端删除(对头)。栈是先进后出的，而队列是先进先出的。 
+
+207，用数组实现循环队列
+分析：
+因为头和尾部如果一直都往后走，前面的空间就浪费了，所以队列一般是循环的。使用数组构建循环队列，使用head和tail标记队首和队尾。一开始head和tail都在数组0脚标位置，如果插入tail就会加1，如果删除head就会加1，在到达数组的末尾的时候可以将他们重新调整为0。可以通过head==tail判断队列为空，可以很容易知道如果一个数组的长度是n，那么设计的队列的最大容量是n-1，因为假设head不动tail在插入第n个元素的时候会head重合，而这种情况队列被判定为空。
+代码：
+	template<class T>
+	class MyQueue
+	{
+		T *data;
+		int head, tail, length; //队首、队尾、数组长度
+	public:
+		MyQueue(int length = 10){
+			this->length = length;
+			head = tail = 0;
+			data = new T[length];
+			if(!data){
+				std::cerr << "new memory error" << std::endl;
+			}
+		}
+		//判断是否为空
+		bool empty(){
+			return head == tail;
+		}
+		//判断是否满了
+		bool full(){
+			return length - 1 == (tail + length - head) % length; //因为tail可能比head还小，所以这里加上一个length.
+		}
+		//插入元素
+		bool push(T e){
+			if(full())
+				return false;
+			data[tail++] = e;
+			tail %= length;
+			return true;
+		}
+		//删除元素
+		void pop(){
+			if(empty())
+				return;
+			head = (head + 1) % length;
+		}
+		//获取队首元素
+		T front(){
+			//note：这里有一个逻辑问题，在取元素的时候是否应该判断是否为空。实际上一般是在调用的时候判断是否为空，然后进行取。如果这里再加一个为空判断就有点多余，还有就是这种异常可以认为不是“取”这个动作引起的，而是使用这个动作不当引起的。所以这里不加上为空判断，而是直接取元素。
+			return data[head];
+		}
+		//获取大小
+		int size(){
+			return (tail + length - head) % length;
+		}
+		~MyQueue(){
+			//释放内部数组
+			delete data;
+		}
+	};
+
+
+208,stl中的stack拷贝是深拷贝还是浅拷贝
+答案：
+通过测试发现stack的拷贝是深拷贝。进一步推测stl中的各种数据结构的拷贝构造函数应该都是做了深拷贝的处理。

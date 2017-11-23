@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>所有的构造器函数包括Object的__proto__都是指向Function的prototype的</title>
+</head>
+<body>
+<script>
+/*
+问题描述：
+	为何Function instanceof Object和Object instanceof Function都是true
+分析：
+	Array Function 和 Object都是内置的构造器函数，所有的构造器函数的__proto__都是指向Function.prototype的，随意Object是Function的实例。而Function.prototype这个对象的__proto__属性又指向了Object.prototype，这样所有的构造器函数的原型链上都有了Object.prototype。所以Function是Object的实例。
+*/
+console.log("Array Object Function的__proto__都是Function.prototype:");
+console.log(Array instanceof Function); //ture
+console.log(Object instanceof Function); //ture
+console.log(Function instanceof Function); //ture
+console.log("Function.prototype.__proto__是Object.prototype，所以所有的函数都是Object的实例:");
+console.log(Function.prototype.__proto__ === Object.prototype); //ture
+</script>
+</body>
+</html>

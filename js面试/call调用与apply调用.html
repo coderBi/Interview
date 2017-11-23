@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>call调用与apply调用</title>
+</head>
+<body>
+<script>
+/*
+题目描述：
+	call调用和apply调用有什么区别
+分析：
+	最明显的区别就是call的参数列表第一个是调用的对象，后面是参数列表。而apply第一个参数是调用对象，后面是一个数组。
+*/
+var func = function(a,b){
+	console.log(a + b);
+};
+// 使用call
+func.call(null,1,2);
+//使用apply
+func.apply(null,[3,4]);
+</script>
+</body>
+</html>	

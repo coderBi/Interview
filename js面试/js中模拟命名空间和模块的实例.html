@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>js中模拟命名空间和模块的实例</title>
+</head>
+<body>
+<script>
+/*
+问题描述：
+	在js中没有命名空间和模块的概念。那么在程序中一般是怎么模拟的。
+分析：
+	在js中一般可以将一个应用或者是一个库中定义一个全局变量，然后所做的一切其他的事情都放到这个全局变量下面。一般这个全局变量会是全大写的有显示意义的词，例如APP。这个APP上面本身可以拥有一些方法。另一方面，对于js中没有的模块的概念，可以通过在这个全局对象上添加属性，然后通用的是将这个属性.module指向一个function，这个function就是一个功能模块。这里有一个小点就是，一般为了不会在进行全局对象的属性赋值的时候出现意想不到的覆盖，所以会在APP下面实现给namespace方法，用于进行属性的检测和创建。
+*/
+//创建一个全局变量，这个全局变量表示一个库或者是一个应用，接下来所有的操作和变量都这个全局变量的内部进行
+var APP = {
+	//定义一个namespace方法，目的是为了进行APP属性的检测和创建。这样可避免在已经创建了一个属性的前提下进行意外的覆盖
+	namespace : function(ns){
+		var parts = ns.split('.'),
+			parent = APP,
+			i;
+		//如果传入的属性名称的最前面是APP.，那么将其从截断的数组中移除
+		if(parts[0] === 'APP')
+			parts.splice(0, 1);
+		for(i = 0; i < parts.length; ++i){
+			//一次判断每一级的属性是否存在，如果不存在就进行创建
+			if('undefined' === typeof parent[parts[i]])
+				parent[parts[i]] = {}; //创建一个直接量赋给这个分支
+			parent = parent[parts[i]];
+		}
+		//最后返回获取经过了或许没有进行内部创建的分支属性
+		return parent;
+	}
+};
+//创建一个模块， 一般的代码是App.namespace('模块名称').module = 一个立即函数,这个立即函数通过闭包可以实现有些属性的私有
+//这里创建一个常量处理的模块
+APP.namespace('constant').module = (function(){
+	var self = APP.constant; //可以保留一个当前分支的对象引用，然后在这个函数内部是用，这样可以不用带上APP...之类的前缀
+	var constants = {}; //保存所有定义的常量
+	var allows = {string : 1,
+		number : 1,
+		boolean : 1
+	}; //保存允许定义的常量的类型，这里是允许基本类型
+	//return的对象中揭示共有的API
+	return {
+		define : function(key,value){
+			//如果已经定义 或者是定义的变量类型是不允许的，就返回false
+			if(this.defined(key) || !allows.hasOwnProperty(typeof value))
+				return false;
+			//定义常量并返回true
+			constants[key] = value;
+			return true;
+		},
+		defined : function(key){
+			return 'undefined' !== typeof constants[key]; //如果定义了返回true
+		},
+		constant : function(key){
+			return this.defined(key) ? constants[key] : null; //没定义就返回null
+		}
+	};
+}());
+//调用模块  下面的前缀可以在是使用之前赋值引用var ref = APP.constant.module
+console.log(APP.constant.module.define('test','value')); //true 成功定义
+console.log(APP.constant.module.defined('test')); //true 
+console.log(APP.constant.module.constant('test')); //value 
+</script>
+</body>
+</html>

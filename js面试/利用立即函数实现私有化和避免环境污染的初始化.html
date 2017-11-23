@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>利用立即函数实现私有化和避免环境污染的初始化</title>
+</head>
+<body>
+<script>
+/*
+题目描述：
+	立即函数有什么作用
+分析：立即函数又叫自执行或者自调用函数或者立即调用函数表达式。是指函数定义之后立即执行的一种语法。可以有以下两种形式：
+	var res = function(){}();  (function func(){})();
+立即函数的作用主要有进行初始化工作和通过对立即函数中变量的引用实现变量的私有化。例如下面的例子：
+	var func;
+	//立即函数很多只执行一次，用于进行初始化。如果直接在全局换进行书写代码初始化，那么在其中使用到的变量可能会造成全局环境的污染。
+	function(){
+		var i = 121; //这个变量在立即函数内部，实现了私有
+		//这个外部的函数的定义在闭包之中
+		func = function(){
+			alert(i);
+		};
+	}();
+*/
+
+var funcs = [];
+//使用立即函数初始化，可以避免环境的污染，例如下面的i如果是在全局环境中引用就会造成污染
+(function(){
+	var x = 100; //这里的x存在与立即函数的内部，被外部funcs引用，实现了私有化
+	for(var i = 0; i < 3; ++i){
+		funcs[i] = function(va){
+			return function(){
+				return va + x;
+			};
+		}(i); //这里利用函数传参 +　立即执行，构建不同函数。因为函数每一次执行都会构建不同的variables对象，这里的i作为形参传入，每一次给不同的variables赋值而不是存在于scope中。
+	}
+})();
+console.log(funcs[0]()); //100
+console.log(funcs[1]()); //101
+console.log(funcs[2]()); //102
+</script>	
+</body>
+</html>	

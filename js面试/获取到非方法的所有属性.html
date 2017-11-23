@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>获取到非方法的所有属性</title>
+</head>
+<body>
+<script>
+/*
+问题描述：
+	设计一个函数，获取到一个对象中的非方法的属性。返回字符串格式为"属性名1：值1，属性名2：值2"
+分析：
+	如果一个属性是方法，那么可以通过typeof获取到，typeof得到的是一个字符串"function"。所以可以遍历一个对象，过滤掉其中的方法，然后将键值对构成返回的结果字符串。
+*/
+
+/*
+	获取所有的非方法的属性
+@param obj 要获取的目标对象
+@return string 所有的非方法的属性的键值对构成的字符串
+*/
+function func(obj){
+	//遍历obj的属性列表，将非方法的属性键值对加入array
+	var arr = [];
+	for(var key in obj){
+		//通过typeof筛选掉方法
+		if(typeof obj[key] !== 'function')
+			arr.push(key + ":" + obj[key]);
+	}
+	//组成字符串 join函数类似与php中的implode
+	return arr.join(',');
+}
+
+var obj = {
+	name : 'coder',
+	age : 13,
+	func : function(){
+		alert('i am a function');
+	}
+};
+console.log(func(obj));  //name:coder,age:13
+</script>	
+</body>
+</html>

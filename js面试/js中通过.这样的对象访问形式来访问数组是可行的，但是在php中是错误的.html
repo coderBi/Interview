@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>js中通过.这样的对象访问形式来访问数组是可行的，但是在php中是错误的</title>
+</head>
+<body>
+<script>
+/*使用.访问的形式来访问数组。在js中是可以通过对象的默认访问方式访问数组的，二者没有区别。但是在php中数组只能通过[]访问，不能通过->访问*/
+	var arr = [1,2,3];
+	arr.name = 'coder'; //通过对象的访问形式访问数组
+	console.log(arr['name']); //coder
+</script>	
+</body>
+</html>

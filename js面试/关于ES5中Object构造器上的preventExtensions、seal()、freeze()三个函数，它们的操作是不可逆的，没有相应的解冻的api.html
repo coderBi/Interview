@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>关于ES5中Object构造器上的preventExtensions、seal()、freeze()三个函数，它们的操作是不可逆的，没有相应的解冻的api</title>
+</head>
+<body>
+<script>
+/*
+关于可扩展、封存、冻结：
+	Object.isExtensible(obj): 判断是否可以扩展，也就是是否可以给对象新增属性
+	Object.isSealed(obj): 判断是否封存一个对象，如果是封存的状态，不仅不可扩展，还不可删除属性
+	Object.isFrozen(obj): 判断一个对象是否冻结，一个对象冻结了就是在封存的基础上所有的属性不可写了
+	Object.preventExtensions(obj): 会将可扩展属性设置为false
+	Object.seal(obj): 会将封存属性设置为true
+	Object.freeze(obj): 会将冻结属性设置为true
+	----note:  关于上面的对象的阻止扩展，封存，冻结的三个函数，一旦对对象使用，之后这个操作是不可逆的。例如一旦冻结了，这个对象就没法解冻，永远都只能是只读不可删除可添加属性的状态了。
+*/
+
+var o1 = {key:'value'}, o2 = {key:'value'};
+Object.preventExtensions(o1);
+console.log(Object.isExtensible(o1)); //false
+o1.name = 'name';
+console.log(o1.hasOwnProperty('name')); //false,上面的赋值语句是失败的
+
+//不可扩展、封存、冻结。这三个设置一个比一个严格，后面的是在前面的基础上进一步配置设置的
+Object.freeze(o2);
+console.log(Object.isExtensible(o2)); //false 因为设置了冻结，自然就不可扩展
+console.log(Object.isSealed(o2));  //true,设置冻结自然被封存
+console.log(Object.isFrozen(o2));  //true
+
+</script>
+</body>
+</html>

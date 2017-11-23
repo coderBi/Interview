@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>在js中实现单例模式</title>
+</head>
+<body>
+<script>
+/*
+关于单例：
+	要实现的效果是 new Single() === new Single()
+	单例可以有饿汉式和饱汉式。这里实现的是饱汉式（延迟加载）。这里使用立即函数形成闭包
+*/
+var Single = (function(){
+	var instance; //保存实例
+	//这个是内部真实的构造器，会用于返回
+	function Single(){
+		this.v = 'hello, single';
+	}
+	//向原型上添加方法，也可以在上面的构造器上对this进行添加
+	Single.prototype.func = function(){
+		console.log(this.v);
+	};	
+	//返回一个构造器对象，其中由于闭包会保存当前这个立即函数中的instance引用
+	return function(){
+		//注意这里的判断代码，如果在java或者C++中可能会考虑线程安全问题。但是在php和js中考虑的比较少
+		if(undefined === instance)
+			instance = new Single; //构造内部对象
+		return instance; //返回单例
+	};
+}());
+//测试
+console.log(new Single() === new Single()); //true，是同一个对象
+</script>
+</body>
+</html>

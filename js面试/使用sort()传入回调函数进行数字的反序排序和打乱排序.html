@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>使用sort()传入回调函数进行数字的反序排序和打乱排序</title>
+</head>
+<body>
+<script>
+/*
+问题描述：
+	使用sort函数进行数字序列从大到小的反序排序。使用sort写一个元素的打乱排序。
+分析：
+	无论是反序还是打乱，出发点都是对sort函数传入一个回调函数，这个回调函数如果返回整数就表示第一个元素在后面，如果是负数就表示第一个元素在前面,如果是0那么他们的相对顺序不变。
+*/
+
+//进行数字的从大到小排序
+var numbers = [2,4,3,1];
+numbers.sort(function(a,b){
+	return b - a;
+});
+console.log(numbers);  //Array[4,3,2,1]
+
+//进行数组的打乱排序 这里利用Math.random()产生随机数
+numbers.sort(function(a,b){
+	return Math.random() - 0.5; //因为random出来的元素是0~1分布，所以减去0.5刚好构成随机的打乱
+});
+console.log(numbers); //打乱
+
+</script>
+</body>
+</html>

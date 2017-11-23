@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>将一个函数的prototype设置为null</title>
+</head>
+<body>
+<script>
+/*
+问题描述：
+	一个函数，如果将其prototype设置为null或者基础数据类型，会有什么后果
+分析：
+	instanceof等涉及到原型链的访问的操作会出现问题，由于new出来的对象的__proto__为函数的prototype，这个时候由于prototype为null所以这个__proto__会直接指向Object.prototype。所以创建的对象只是Object的实例。这个时候如果访问test instanceof Test，会由于Test.prototype为null抛出异常
+*/
+	function Test(){
+		this.name = "test";
+	}
+	Test.prototype = null;
+	var test = new Test();
+	console.log(test instanceof Object); //ture
+	console.log(test instanceof Test); //抛出异常，提示prototype of Test is not an object
+</script>
+</body>
+</html>

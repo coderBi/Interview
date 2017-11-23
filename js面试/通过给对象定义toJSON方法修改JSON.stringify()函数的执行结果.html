@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>通过给对象定义toJSON方法修改JSON.stringify()函数的执行结果.</title>
+</head>
+<body>
+<script>
+/*
+问题描述：
+	如何修改JSON.stringify()函数的执行结果
+分析：
+	JSON.stringify()函数执行的时候，如果对象上自定义了toJSON方法，会执行这个方法，将它的返回值作为最终的JSON字符串。所以可以通过给对象添加这个toJSON方法修改默认的stringify()执行结果。一个例子就是Date.prototype.toJSON()方法，将Date对象转换为比较合适的JSON字符串。
+*/
+
+//自定义toJSON方法
+var o = {
+	name : 'o',
+	number : 1,
+	toJSON : function(){
+		return "my name is " + this.name + " and my number is " + this.number;
+	}
+};
+console.log(JSON.stringify(o)); //"my name is o and my number is 1"
+
+//一个例子，Date.prototype.toJSON就是将Date对象格式化为JSON字符串。这个函数一般不会自己调用，而是供给JSON.stringify()函数使用的
+console.log(JSON.stringify(new Date)); //"2017-10-22T14:34:39.351Z"
+console.log(JSON.parse("2017-10-22T14:34:39.351Z"));  //会报错，因为传入的并不是JSON字符串，所以转换不了JSON对象
+</script>
+</body>
+</html>

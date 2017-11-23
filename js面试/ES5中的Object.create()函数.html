@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>ES5中的Object.create()函数</title>
+</head>
+<body>
+<script>
+/*
+描述：
+	Object.create(指定的原型对象, 要创建的对象本身的属性构成的对象): 这个函数第二个参数传入的对象中的属性的值必须是属性描述符{value:'xx', enumerable: false, writable: false, configurable: false}。如果属性描述符对象中只有value属性，那么默认的三个特性都是false，也就是{value:'xx'}和后面跟上三个特性值为false的情况是一样的。另一方面，兼容ES3，直接向对象上追加一个新的属性，由于没有属性描述符三个特性的值都是true的（也就是像ES3中那样默认都是可以枚举可写可配置的）
+---note:
+	在对象创建好了之后，如果将一个属性描述符赋给一个属性，那么这个属性描述符并没有什么特殊的，仅仅就是将一个属性赋值为一个对象。并不会进行属性描述符的解析。如下：
+		obj.address = {value: 'ha', enumerable: false, writable: false, configurable: true};
+	只是将增加了一个address属性，这个属性指向一个对象。如果要在创建对象之后对一个属性进行带属性描述符的赋值，可以使用Object.defineProperty(obj对象，'要定义的属性名称',{属性描述符})或者是通过Object.defineProperties(obj对象,{‘属性名称1’:{描述符对象1}})
+*/
+
+//利用Object.create()创建对象
+var obj = Object.create({name:'proto'},{
+	age : {value:11}, //如果传入的是属性描述符，那么默认的三个特性的值都是false
+	//address : 'where am i ', //传入的不是属性描述符，会报错。这里的属性必须只能传入属性描述符
+	configure : {value: 'configure', enumerable: true, writable: true, configurable: true}
+});
+
+//通过向对象上直接添加一个属性，和ES3中一样，这个新属性的特性都是true
+obj.address = 'where am i';
+
+//创建对象之后可以通过Object.defineProperty()添加一个属性，并且用一个属性描述符进行初始化
+Object.defineProperty(obj,'added',{value:'added', enumerable: true});
+
+console.log(obj.hasOwnProperty('name')); //false，这个属性在原型上
+
+for(var key in obj){
+	//可以发现除了age属性，其他的自身的属性和原型链上的name属性都是可枚举的
+	console.log(key + ":" + obj[key]);
+}
+</script>
+</body>
+</html>

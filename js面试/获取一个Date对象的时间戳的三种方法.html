@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>获取一个Date对象的时间戳的三种方法</title>
+</head>
+<body>
+<script>
+/*
+问题描述：
+	如何得到一个Date对象的时间戳
+分析：
+	可以使用Number函数进行转换，也可以是使用算数运算符例如 +new Date()。还可以是用Date.prototype.getTime()
+*/
+var d = new Date();
+//方法一：通过Number()转换
+console.log(Number(d));
+//方法二：通过算符运算符+ 转换
+console.log(+d);
+//方法三： 通过Date.prototype.getTime获取
+console.log(d.getTime());
+</script>
+</body>
+</html>		

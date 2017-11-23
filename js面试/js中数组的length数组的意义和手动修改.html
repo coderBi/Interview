@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>js中数组的length数组的意义和手动修改</title>
+</head>
+<body>
+<script>
+/*
+问题描述：
+	下面的代码结果是什么
+	var arr = [1];
+	arr.length = 10;
+	console.log(arr[1]); //undefined
+	arr[99] = 99;
+	console.log(arr.length); //100
+分析：
+	js中的数组的length和php中的count()函数进行统计是不同的。js中的length只是会设计到数字脚标的计算，这个脚标是从0开始依次递增的。arr.length = 10，只是单纯的修改了length属性，并没有添加arr[1~9]所以访问arr[1]得到的是undefined。arr[99] = 99会向数组中添加一个新元素，新元素的脚标是99，内部会重置length，将length修改为100.
+*/
+
+var arr = [1];
+arr.length = 10;
+console.log(arr[1]); //undefined
+arr[99] = 99;
+console.log(arr.length); //100
+</script>
+</body>
+</html>

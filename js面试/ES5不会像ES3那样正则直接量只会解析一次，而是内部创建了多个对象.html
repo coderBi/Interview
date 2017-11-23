@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>ES5不会像ES3那样正则直接量只会解析一次，而是内部创建了多个对象</title>
+</head>
+<body>
+<script>
+function gimme(){
+	return /a-z/;
+}
+var a = gimme();
+var b = gimme();
+console.log(a === b);  //false 但是据书上说明在ES3中这个表达式的值是true
+</script>	
+</body>
+</html>	

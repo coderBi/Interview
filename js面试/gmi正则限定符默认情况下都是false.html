@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>gmi正则限定符默认情况下都是false</title>
+</head>
+<body>
+<script>
+/*
+问题描述：
+	RegExp()构造器，有那些限定符
+分析：
+	g： 是global的意思，是进行全局匹配，而不是只匹配一个。其实就是在匹配之后将内部的指针后移，如果不进行这种后移，那么每次匹配的都只会是第一个匹配。
+	m：multiline的意思，是进行多行匹配。
+	i: 忽略大小写。
+---补充：
+	上面的三种限定符，在默认的情况下都是false，也就是都是不生效的。可以通过new RegExp('[a-z]','gmi')或者是/[a-z]/gmi在创建对象的时候进行限定。
+	另一方面可以在创建对象之后对reg.ignoreCase  reg.global reg.multiline进行重新的限定和修改
+*/
+
+var reg = /[a-z]/;
+console.log(reg.ignoreCase); //false
+console.log(reg.multiline); //false
+console.log(reg.global); //false
+console.log(new String('hello world'));
+</script>
+</body>
+</html>

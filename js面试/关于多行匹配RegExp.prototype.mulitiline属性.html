@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>关于多行匹配RegExp.prototype.mulitiline属性</title>
+</head>
+<body>
+<script>
+/*
+关于多行匹配：
+	m：multiline的意思，是进行多行匹配。如果是多行匹配，那么会修改^$这两个的意思，^变成了行首而$变成了行尾，例如如果写成/^a/m会匹配到每一行的行首的a。
+*/
+
+var reg = /^a/;
+//默认情况下是^和$是代表整个匹配的字符串的开始和结束
+console.log(reg.test("b\na")); //fasle, 由于不是多行匹配，所以不会匹配到第二行的a
+//修改为多行匹配  通过直接修改创建之后的对象的属性是失败的，因为正则对象创建之后属性是不能直接修改的，需要通过compile函数。
+reg.multiline = true;
+console.log(reg.test("b\na")); //属性不能直接访问修改
+console.log(reg.multiline); //依然是false，因为不能在创建RegExp对象之后直接进行属性的修改
+console.log(reg.source); //表示匹配的模式字符串
+reg.source = '*';
+console.log(reg.source);  //依然是^a，可以知道创建之后的正则的所有的属性都是不能直接更改的
+
+//通过重新构建正则对象进行重新匹配
+var reg = /^a/m;
+console.log(reg.test('b\na')); //ture，因为设置了多行匹配，所以^是匹配每一行的行首
+</script>
+</body>
+</html>

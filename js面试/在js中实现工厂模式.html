@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>在js中实现工厂模式</title>
+</head>
+<body>
+<script>
+/*
+关于工厂：
+	这里要实现的通过传入不同的“类名”，创建不同的对象。形如Factory.create('构造器名')
+	js中可以考虑将不同的构造器作为属性放到工厂的下面，这样根据传入的名称，判断是否存在相应的构造器并创建对象进行返回
+*/
+//这实现一个创建多边形(Polygon)的工厂
+var Polygon = {
+	factory : function(name){
+		if(undefined === this[name])
+			throw new Error('the function ' + name + ' does not exist');
+		return new this[name]();
+	},
+	//创建四边形
+	Square : function(){
+		console.log('a square is created');
+	}
+};
+//可以向工厂上添加其他类型构造器
+Polygon.Circle = function(){
+	console.log('i am a circle');
+};
+
+//测试  工厂模式可以通过构造器的名称字符串创建对象
+Polygon.factory('Square');
+Polygon.factory('Circle');
+Polygon.factory('Test'); //抛出了一个错误“the function Test does not exist”
+</script>
+</body>
+</html>

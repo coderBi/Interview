@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>js中不存在常量，这里模拟php中常量define</title>
+</head>
+<body>
+<script>
+/*
+问题描述：
+	js中如何定义常量
+分析：
+	js中并没有现成的定义常量的方式，虽然有的js环境中提供const PI = 3.14之类的写法，但是js中不存在"常量"这样的内容。不过可以通过闭包来模拟php中的define() defined() constant()，注意php中是不允许常量是对象的，只能是基本类型。
+
+*/
+//模拟Math JSON这样的内部对象，将所有的常量相关的数据和计算放到一个自定义的Constant对象中
+var Constant = (function(){
+	var constants = {}; //存储定义的所有常量
+	var allows = {string:1, number:1, boolean:1}; //定义所有可以保存的常量数据的类型，这里只允许字符串数字和bool类型
+	return {
+		define: function(key,value){
+			//定义失败 返回false
+			if(this.defined(key) || !allows.hasOwnProperty(typeof value))
+				return false;
+			constants[key] = value;
+			//定义成功 返回true
+			return true;
+		},
+		defined: function(key){
+			return undefined !== constants[key]; //已定义返回true
+		},
+		constant: function(key){
+			//如果确实已经定义了就返回定义的常量，否则返回null
+			return this.defined(key) ? constants[key] : null;
+		}
+	};
+}());
+//测试
+console.log(Constant.defined('key')); //false
+console.log(Constant.define('key',{})); //false   不允许值类型为对象
+console.log(Constant.define('key',1)); //true
+console.log(Constant.define('key',2)); //false 重定义
+console.log(Constant.defined('key')); //true
+console.log(Constant.constant('key')); //1
+</script>
+</body>
+</html>

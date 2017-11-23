@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>使用Function.prototype.bind()方法</title>
+</head>
+<body>
+<script>
+/*
+问题描述：
+	简述Function.prototype.bind()方法：
+分析：
+	是ES5新增的方法，可以对一个函数执行之前绑定里面的调用对象。下面是一个例子:
+		var obj = {name : 'hello', func : function(){alert(this.name);}}
+		var func = obj.func;
+		//如果直接调用func，那么其中的this指代的是全局对象，alert的是undefined
+		func(); //undefined
+		//使用Function.prototype.bind()
+		func.bind(obj);
+		func(); //hello，因为绑定了obj对象，所以结果是返回的obj对象的name
+*/
+
+	var obj = {name : 'hello', func : function(){alert(this.name);}}
+	var func = obj.func;
+	//如果直接调用func，那么其中的this指代的是全局对象，alert的是undefined
+	func(); //undefined
+	//使用Function.prototype.bind()
+	func = func.bind(obj); //bind方法不是在原对象上进行设置的而是返回新对象，因为原来的函数可能在其他的地方被引用，不应该改变原来的调用预期
+	func(); //hello，因为绑定了obj对象，所以结果是返回的obj对象的name
+</script>	
+</body>
+</html>	

@@ -576,3 +576,32 @@ php中只有函数表达式才能构成闭包，而对于一般的函数申明�
 
 
 67，小知识点：php中尽管可以使用$func()直接调用，但是不能使用$func()()，这种写法会出现编译错误，说是第二个括号是unexpected。尽管如果是闭包环境$func()返回的可能就是一个函数表达式，但是编译通不过。
+
+
+68，下面的代码能否正确执行
+	$func = function(){};
+	$a = "func";
+	$a();
+答案：匿名函数的名称并不是func，这里只是使用一个$func变量进行了函数的引用保存。所以如果使用"func"()进行调用会出现error: 调用函数undefined。
+
+
+69，下面的代码是否正确：
+	$var =  array(
+		'name' => 'coder',
+	);
+	echo $var->name;
+分析与答案：
+这样访问是不正确的，原因是通过->访问的左操作数应该是对象，但是这里出现的是数组。php中的数组只能是通过$arr['keyname']访问，php中的对象默认是通过$obj->keyname访问。但是如果keyname是用一个变量保存，那么也允许通过$obj['key']访问。这是一个可能会跟js搞混的地方。js中数组和对象两种访问完全都是可接受的，数组也可以使用.访问，对象也可以向php中那样使用obj[key]访问。
+实测代码：
+	$arr = array(
+		'name' => 'coder',
+		'age' => 11
+	);
+
+	echo $arr->name; //抛出的一个notice：trying to get property of non-object
+
+
+70，利用php中的sort()函数，如何实现对整数数组的排序，如何实现对字符串的自然排序。如何实现一个数组中元素的打乱排序。
+答案：
+sort()函数默认是自然排序的，其中第二个参数是可以指定排序的方式的。sort($arr, SORT_STRING)指示进行自然排序。sort($arr, SORT_NUMERIC)指示进行数字大小的排序。
+php中存在一个函数shuffle()，内部使用随机数，进行元素的打乱重排序。

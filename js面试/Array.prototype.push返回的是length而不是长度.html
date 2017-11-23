@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Array.prototype.push返回的是length而不是长度</title>
+</head>
+<body>
+<script>
+/*
+	书上说这个函数返回的是数组的长度，其实不然。因为这个函数只是返回更新后的length。而length一方面是可以修改的，另一方面这个length的统计没有包括关联的键，所以说是长度一定程度上是不严谨的
+*/
+	var a = [1];
+	a.length = 10;
+	a['key']  = 'value';
+	console.log(a.length); //10
+	console.log(a.push('2','a','b')); //10 + 3 = 13
+</script>
+</body>
+</html>

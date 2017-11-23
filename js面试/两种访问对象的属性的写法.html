@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title> 两种访问对象的属性的写法</title>
+</head>
+<body>
+<script>
+/*
+问题描述：
+	一个变量保存了一个属性的名称字符串。那么如果通过对象访问这个这个属性。
+分析：
+	访问对象的属性，一般可以通过o.attr或者是o[attr]，由于属性的名称是保存为字符串，那么如果是使用o.attr会造成歧义，这种情况下只能使用o[atrr]
+*/
+var v = {
+	"name" : "coder",
+	age : 12
+};
+console.log(v.name);
+console.log(v[name]); //undefined 因为将name进行了变量解析
+console.log(v['name']); //coder 正确显示
+</script>
+</body>
+</html>

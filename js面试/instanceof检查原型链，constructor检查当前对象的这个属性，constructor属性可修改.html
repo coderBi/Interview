@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>instanceof检查原型链，constructor检查当前对象的这个属性，constructor属性可修改</title>
+</head>
+<body>
+<script>
+/*
+问题描述：
+	instanceof的实现细节是检查一个对象的原型链，判断这个对象是否是某一个构造器的实例。constructor检查一个对象的constructor属性，判断是否是某一个构造器创建的。但是这个属性时候可以修改的。
+note: 
+	1）一个对象一旦创建，其原型链就不能更改了。instanceof就是通过对各种__proto__的向上分析，查看是存在指定函数创建的实例存在在这里个链上。
+	2）一个对象new出来之后，其prototype指向的是创建它的构造器函数。而其__proto__指向的是其构造器函数的prototype属性。也就是说当前对象的prototype属性影响到用这个对象（也是函数）创建的对象的调用，而当前这个对象的__proto__影响当前对象可调用的方法集合。
+	3）一般分析__proto__是一个私有的属性，但是在ff中的调试工具中是将其暴露出来的。而prototype可以认为是公开的设置接口，通过对prototype属性的设置，可以对这个（函数）对象创建的对象可调用的函数进行扩展。
+	4) 一般函数如果如果没有设置，其__proto__为Object，其prototype为Object（表示为Object创建）。
+*/
+
+var outer = function(){
+	this.a = "hello";
+};
+
+var inner = function(){
+	this.b = "world";
+};
+inner.prototype = new outer; //注意如果是innner.prototype = outer。由于outer的prototype是object，那么这个原型链就成了inner->->object。而这里设置为new  outer,那么原型链就是 inner->outer实例化对象->object(这个object是创建的outer实例化的对象的__proto__指向的)
+var obj = new inner;
+console.log(obj);
+console.log(obj instanceof outer); //true。原因是在原型链上找到了一个__proto__为new出来的outer对象，也就是outer的实例。所以判断为obj为outer的实例。
+console.log(obj instanceof inner); //obj的__proto__属性指向了inner
+console.log(obj instanceof Object); //new outer的对象的__proto__指向了object
+</script>
+</body>
+</html>

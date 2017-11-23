@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>私有属性与方法的暴露注意与揭示模式</title>
+</head>
+<body>
+<script>
+/*
+问题描述：
+	如何让属性和方法进行私有，如何进行私有属性和方法的暴露。
+分析：
+构造器中间凡是没有使用this.进行赋值的属性和方法都是私有的。私有的属性和方法的暴露可以参考下面的代码
+	var obj = (function(){
+		var a = 1; //私有属性1，不是对象（这里的对象包括数组、函数等）
+		var b = [1,2]; //私有属性2，是一个对象属性
+		//是一个私有方法，也是一个私有的对象属性
+		function c(){
+			return 'i am a private method, and i can see the public var d is : ' + public_api.d;
+		}
+		//共有的属性和方法都放到这个对象中，要暴露的私有属性和方法可以在这里面指定
+		var public_api = {
+			getA : function(){ return a;}, //私有属性a非对象，所以这里可以选择直接赋值传出
+			getB : function(){return JSON.parse(JSON.stringify(b));}, //利用json进行对象的深拷贝传出，保证内部的私有属性不会被修改
+			methodC : function(){return c();}, //这里之所以不是直接写成c函数赋值，因为如果直接将c赋给methodC，那么由于是函数也是对象传递，会将一个私有方法完全公开了，外部获取了引用可能会修改这个函数。
+			d : "this is a public atrrubute"
+		};
+		return public_api; 
+			
+
+		//另一种方案：“揭示模式”，指的是前面将所有的属性和方法全部私有，然后在这里进行选择暴露，但是这种方式不实用的地方就是在函数定义的地方不能一样看到是否是暴露的(为了解决这个问题可以加上一些注释说明)
+		return {
+			a : a,
+			b : b,
+			c : c
+		};
+	}());
+
+*/
+
+//常规私有属性与方法的暴露
+	var obj = (function(){
+		var a = 1; //私有属性1，不是对象（这里的对象包括数组、函数等）
+		var b = [1,2]; //私有属性2，是一个对象属性
+		//是一个私有方法，也是一个私有的对象属性
+		function c(){
+			return 'i am a private method, and i can see the public var d is : ' + public_api.d;
+		}
+		//共有的属性和方法都放到这个对象中，要暴露的私有属性和方法可以在这里面指定
+		var public_api = {
+			getA : function(){ return a;}, //私有属性a非对象，所以这里可以选择直接赋值传出
+			getB : function(){return JSON.parse(JSON.stringify(b));}, //利用json进行对象的深拷贝传出，保证内部的私有属性不会被修改
+			methodC : function(){return c();}, //这里之所以不是直接写成c函数赋值，因为如果直接将c赋给methodC，那么由于是函数也是对象传递，会将一个私有方法完全公开了，外部获取了引用可能会修改这个函数。
+			d : "this is a public atrrubute"
+		};
+		return public_api; 
+	}());
+//调用测试
+	console.log(undefined === obj.a); //true
+	console.log(obj.getA()); //1
+	console.log(obj.getB()); //Array[1,2]
+	console.log(obj.methodC()); //i am a private method, and i can see the public var d is : this is a public atrrubute
+	//不能进行私有属性的修改
+	obj.getB().push(222); //这个操作发生在深拷贝的数组上面了，没有直接作用在内部的私有属性上
+	console.log(obj.getB());//Array[1,2]
+
+//使用揭示模式，因为定义属性和方法的时候都是私有的，所以为了阅读方便，最好加上一些说明
+	var display = (function(){
+		var a = "private";
+		var b = "public";
+		return {
+			b : b //传递一个私有属性暴露出来，进行“揭示”
+		};
+	}());
+//测试
+	console.log(display.a);//undefined
+	console.log(display.b); //public
+</script>
+</body>
+</html>

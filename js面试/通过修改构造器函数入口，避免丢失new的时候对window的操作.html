@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>通过修改构造器函数入口，避免丢失new的时候对window的操作</title>
+</head>
+<body>
+<script>
+/*
+题目描述：
+	构造器函数如果没有new，那么其中的this会指代到window，这个时候可能出现一些意想不到的污染。如何避免。
+分析：
+	一方面，对于构造器函数，首字母要大写。这样让调用者很清楚的知道调用意图。另一方面，构造器函数在执行的时候，如果不是通过new调用，那么内部的所有this会指代到window，通过这一点，可以在构造器函数的入口判断this是否是window或者是其他的不符合类型的对象，如果是不符合类型的对象就重新new一个当前构造器的实例返回，如果this的确是当前需要的类型，就接着往下面走进行属性的设置。（注意：在ES5中的严格模式下，是可以检测到这种一样的this的，并且解析报错）
+补充：
+	一个对象一旦创建，其prototype属性是不能更改的(注意，这里说的原型链其实是__proto__链，而prototype属性是开放的设置接口)，所以使用instanceof通过检查prototype原型链来判断是否是某一个构造器的实例是可靠的。如果使用一个对象的constructor属性，那么会由于这个属性是可更改的可能出现误判。
+*/
+
+//修改构造器函数入口，如果this不是要求的类型的实例，就重新new
+function Func(){
+	if(!(this instanceof Func))
+		//没有通过new进入，所以重新new
+		return new Func();
+	this.attr = "hello";
+}
+var va = Func();
+console.log(va); //{attr:"hello"}
+
+var vb = {"key":"value"};
+var vc = Func.call(vb); //vb的原型链上没有Func，所以还是会创建新的实例对象
+console.log(vc); 
+</script>
+</body>
+</html>

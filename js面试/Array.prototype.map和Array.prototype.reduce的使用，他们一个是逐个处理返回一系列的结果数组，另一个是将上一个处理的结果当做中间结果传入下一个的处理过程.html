@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Array.prototype.map和Array.prototype.reduce的使用，他们一个是逐个处理返回一系列的结果数组，另一个是将上一个处理的结果当做中间结果传入下一个的处理过程</title>
+</head>
+<body>
+<script>
+/*
+问题描述：
+	Array.prototype.map和Array.prototype.reduce的返回结果是什么，它们会不会修改原来的数组.
+分析：
+	map是将没有一个元素进行处理，然后将处理之后的结果添加到一个新的数组进行返回。由于是返回的新数组，所以不会操作原数组的元素。
+	reduce是依次遍历所有的元素进行处理，但是上一个处理的结果会作为参数传入下一个处理的过程。整个函数最终返回的结果是所有元素处理完成之后的结果。由于不涉及原数组元素的修改，原数组只是输入，所以不会修改原数组元素。
+关于几个函数的描述：
+	Array.prototype.map(function(item){return 每一个元素处理之后的结果}): 会将每一个元素处理之后的结果组成一个新的数组进行返回。这个函数返回的是处理之后的新数组。
+	Array.prototype.reduce(function(第一个参数很特殊除了第一次遍历处理这个参数是输入的后面每一次这个参数会置成前一个reduce的计算的结果, 遍历的元素item, 遍历的index, 遍历的整个数组), 初始传入给回调函数的第一个参数的值): 这个函数会遍历整个数组依次进行处理，每一次处理得到的结果会传入下一次处理，具体的是作为回调的第一个形参传入。
+	Array.prototype.reduceRight(): 和reduce类似，只是遍历元素的顺序是从右往左的。
+*/
+
+//使用Array.prototype.map
+var arr = [1,2,3,4];
+console.log(arr.map(function(item){
+	//返回的是每一个元素处理之后的结果，这个结果会添加到最终的返回结果数组中
+	return	'^' + item + '$';
+})); //Array['^1$','^2$','^3$','^4$']
+console.log(arr); //不会修改原数组
+
+//使用Array.prototype.reduce
+console.log(arr.reduce(function(result,item,index,input){
+	return result + item + ' ';
+}, 'the content of the input  array is: ')); //the content of the input array is: 1 2 3 4
+console.log(arr); //不会修改原数组
+</script>	
+</body>
+</html>

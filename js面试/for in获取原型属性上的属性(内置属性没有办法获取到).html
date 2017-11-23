@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>for in获取原型属性上的属性</title>
+</head>
+<body>
+<script>
+/*
+问题描述：
+	for in是否可以获取到原型属性上的属性
+分析：
+	js中的for in是遍历对象的所有的属性。这里包括原型链上的对象的属性。但是for in只能用于遍历得到用户自定义的属性，内置的属性是不能被遍历到的。
+*/
+var proto = {
+	name : 'coder',
+	age : 11
+};
+
+function Func(){
+	this.address = 'china';
+}
+Func.prototype = proto;
+var obj = new Func;
+for(var key in obj){
+	//这可以遍历到三个属性，所以说明是可以访问的到圆形链上的上级对象的属性的
+	console.log(key + ":" + obj[key]);  
+}
+</script>	
+</body>
+</html>

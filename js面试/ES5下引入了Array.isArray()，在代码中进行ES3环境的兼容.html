@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>ES5下引入了Array.isArray()，在代码中进行ES3环境的兼容</title>
+</head>
+<body>
+<script>
+/*
+问题描述：
+	ES5下引入了Array.isArray()，如何在代码中进行ES3环境的兼容
+分析：
+	Object.prototype.toString()方法，对于对象会返回"[object 创建这个对象的内部构造器,大部分情况都是直接为Object，有些时候可以是Function、Array等]"。所以可以在ES3环境下自己给Array添加isArray属性
+*/
+
+if(!Array.isArray){
+	Array.isArray = function(obj){
+		return "[object Array]" === Object.prototype.toString.call(obj);
+	};
+}
+//isArray()相当于php中的is_array()函数，判断一个变量是否是数组
+console.log(Array.isArray({})); //false
+console.log(Array.isArray([])); //true
+</script>
+</body>
+</html>

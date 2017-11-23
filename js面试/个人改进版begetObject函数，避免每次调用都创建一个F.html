@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>个人改进版begetObject函数，避免每次调用都创建一个F()</title>
+</head>
+<body>
+<script>
+/*
+问题描述：
+	说明Object.create()
+分析：
+	Object.create()是ECMAScript5的一部分，来自于json的发明者Douglas Crockford提出的begetOjbect函数。作用是返回一个以指定对象为原型的对象。begetObject函数的如下：
+	function begetObject(proto){
+		//使用一个临时函数，将其原型属性设置为传入的参数
+		function F(){}
+		F.prototype = proto;
+		return new F;
+	}
+补充：
+	个人改进版begetObject，将F函数直接放到begetObject函数的prototype上，这样就不用每次进行函数都创建一个F()
+*/
+
+/*个人改进版begetObject*/
+function begetObject(o){
+	//利用将F保存到原型，避免每次创建F
+	var F = begetObject.prototype.F = begetObject.prototype.F || function(){};
+	F.prototype = o;
+	return new F();
+}
+
+//测试
+var proto = {
+	'name' : 'coder'
+};
+var obj = begetObject(proto);
+console.log(obj);
+</script>
+</body>
+</html>

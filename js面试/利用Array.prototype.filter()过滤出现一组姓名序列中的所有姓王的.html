@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>过滤出姓名序列中所有的姓王的人</title>
+</head>
+<body>
+<script>
+/*
+问题描述：
+	一组姓名序列组成的数组，写一个函数过滤出其中的所有的姓王的人
+分析：
+	利用Array.prototype.filter()过滤，传入一个回调函数，里面使用正则测试。
+*/
+
+var names = ['张三','李四','王五','狗剩','王小二'];
+(function(names){
+	//输出Array['王五','王小二']
+	console.log(names.filter(function(item){
+		return item.match(/^王/);
+	}));
+})(names);
+</script>
+</body>
+</html>

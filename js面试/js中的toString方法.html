@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>js中的toString方法</title>
+</head>
+<body>
+<script>
+/*
+①：js中的toString方法是Object.prototype中的方法，其他的对象可以重写这个方法。这个方法是将函数转为字符串的时候调用的。在不同的浏览器中显示的可能会有一些差异，但是主体的内容就是将函数体用字符串的形式显示出来。
+②：内置对象Array等都有自己的默认重写格式
+③：toString函数不是标准，不同浏览器有所不同
+*/
+console.log(''+Array); //和调用Array.toString()效果一样（Array代码体的内容比较特殊，显示的是一个[native code]）。注意console.log本身会处理各种不同的对象格式的显示如果直接log(Array)会显示function Array()
+function func(){
+	alert('hello');
+}
+console.log(func.toString()); //会显示整个函数定义包括定义体的内容
+</script>	
+</body>
+</html>

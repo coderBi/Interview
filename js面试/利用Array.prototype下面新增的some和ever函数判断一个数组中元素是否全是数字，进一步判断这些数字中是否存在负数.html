@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>利用Array.prototype下面新增的some和ever函数判断一个数组中元素是否全是数字，进一步判断这些数字中是否存在负数</title>
+</head>
+<body>
+<script>
+/*
+问题描述：
+	书写代码判断一个数组中元素是否全是数字，进一步判断这些数字中是否存在负数
+分析：
+	ES5中新增的Array.prototype.every可以检查是否所有元素都是数字，而Array.prototye.some()可以判断是否其中存在负数.
+*/
+
+var arr = [1,2,3,'22',-1];
+//判断是否全是数字，因为这里有'22'，所以结果是false
+console.log(arr.every(function(item){
+	return typeof item === 'number';
+}));
+
+//判断是否存在负数
+console.log(arr.some(function(item){
+	return typeof item === 'number' && item < 0;
+}));
+</script>
+</body>
+</html>

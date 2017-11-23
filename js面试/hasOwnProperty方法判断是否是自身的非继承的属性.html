@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>hasOwnProperty方法判断是否是自身的非继承的属性</title>
+</head>
+<body>
+<script>
+/*
+	hasOwnProperty存在与Object.property上。可以用来判断一个对象是否有某个属性并且这个属性不是继承来的。
+*/
+function Test(){
+	this.name = 'coder';
+}
+Test.prototype.age = 11;
+var obj = new Test;
+console.log(obj.hasOwnProperty('name')); //true 自身拥有
+console.log(obj.hasOwnProperty('age')); //fasle 因为存在于原型链
+for(var key in obj){
+	//遍历可以得到本身的和原型链上面继承的属性
+	console.log(key + ":" + obj[key]);
+}
+</script>
+</body>
+</html>

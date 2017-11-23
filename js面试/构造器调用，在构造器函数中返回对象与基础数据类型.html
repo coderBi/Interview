@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>构造器调用，在构造器函数中返回对象与基础数据类型</title>
+</head>
+<body>
+<script>
+/*
+问题描述：
+	构造器函数中的返回值类型对最终构造的对象有何影响
+分析：
+	构造器函数中如果没有return或者return了基本数据类型，那么构造器会坚持返回this。如果构造器中返回的是一个对象，那么this将会失效，函数采用的是返回的指定对象。这种情况下，称之为构造器调用，这个时候new func()和直接将构造器当初普通函数执行func()一般是没有区别的。使用构造器调用，会导致instanceof运算符和constructor属性与预期的不一致。
+*/
+
+//构造器中返回基础数据类型的时候，会依然返回this
+function Func1(){
+	return 1;
+}
+var f1 =  new Func1;  //和其他的语言一样，如果使用的是默认的初始化列表，new操作符后面类名中的括号可以省略。
+console.log(f1 instanceof Func1); //true
+
+//构造器中返回对象，那么就不会返回this了。this被舍弃，这个时候instanceof和constructor属性不会正常显示
+function Func2(){
+	return {
+		'a' : "hello"
+	};
+}
+var f2 = new Func2(); //这个时候完全可以去掉new，所以称之为构造器调用
+console.log(f2 instanceof Func2); //false
+console.log(f2 instanceof Object); //true。因为是直接量，所以原型是Object.prototype
+console.log(f2.constructor === Object); //Object.prototype.constructor属性指向的是Object
+</script>
+</body>
+</html>

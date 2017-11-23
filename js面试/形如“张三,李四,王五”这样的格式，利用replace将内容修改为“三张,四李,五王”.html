@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>形如“张三,李四,王五”这样的格式，利用replace将内容修改为“三张,四李,五王”</title>
+</head>
+<body>
+<script>
+/*
+问题描述：
+	形如"张三,李四,王五"这样的格式，利用replace将内容修改为"三张,四李,五王"
+分析：
+	一方面，可以在替换的字符串设定上使用$1 $2这样的子表达式进行书写。另一方面，也可以使用回调函数进行处理。 
+*/
+
+//使用子表达式
+console.log("张三,李四,王五".replace(/([^,])([^,]+)/g, '$2$1'));
+//使用回调
+console.log("张三,李四,王五".replace(/([^,])([^,]+)/g, function(){
+	//arguements最后两个形参是index和input对应查找的位置和输入的源字符串。前面的三个参数是完全匹配和两个子表达式对应的匹配
+	return arguments[2] + arguments[1]; //操作两个子表达式
+}));
+</script>
+</body>
+</html>

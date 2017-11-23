@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>实现经典构造器继承extend(Child,parent)</title>
+</head>
+<body>
+<script>
+/*
+问题描述：
+	实现一个extend(Child,Parent)函数，让构造器函数Child经典继承构造器函数Parent
+分析：
+	最简单的想法是直接Child.prototype = Parent.prototype，但是这里存在一个问题就是这样修改了Child.prototype原本的constructor，如果直接在这个新的原型上进行修改，那么由于js中对象是引用传递，那么就是直接修改Parent.prototype，这样就会导致用Parent创建的对象中的constructor不正确。所以考虑再创建一个对象，让其原型为Parent.prototype，然后将Child.prototype指向这个新对象。最后在这个新对象上修正constructor。根据书上的介绍，为了方便，可以在这个新对象上增加一个parent名称的属性，保存Parent的引用以方便可能的引用
+*/
+
+function extend(Child,Parent){
+	//利用一个临时函数，将其prototype设置为parent.prototype
+	function F(){}
+	F.prototype = Parent.prototype; //通过分析，不能直接Child.prototype进行传递，因为不方便纠正constructor属性
+	Child.prototype = new F;
+	//修正Child.prototype.constructor
+	Child.prototype.constructor = Child;
+	//增加一个Parant的引用
+	Child.prototype.parent = Parent;
+}
+
+//测试
+function Parent(){}
+Parent.prototype.func = function(){
+	alert('hello, i am a function in Parent.prototype');
+};
+function Child(){}
+extend(Child,Parent);
+var v = new Child;
+console.log(v);
+v.func();
+</script>	
+</body>
+</html>

@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>在js中实现装饰器模式</title>
+</head>
+<body>
+<script>
+/*
+关于装饰器：
+	装饰器允许在运行的时候在不改变对象的调用接口的前提下增强一个对象的功能。在js中可以将各种装饰器对象保存在构造器函数的属性上。
+	目标：指定装饰器之后使用原来的接口进行调用可以得到增强的功能。
+*/
+//这里实现一个文字处理的装饰效果
+function Text(txt){
+	this.txt = txt;
+	//保存配置要使用的装饰器的名称  因为对于每一个对象，选择的装饰可能不同个，所以这个属性是直接添加到对象上而不是原型上
+	this.decorators = [];
+}
+//添加一个装饰器
+Text.prototype.decorate = function(decorator){
+	this.decorators.push(decorator);
+	return this; //方便链式调用
+};
+Text.prototype.get = function(){
+	//根据配置的装饰器预先处理文本，这样可以增强一个简单的get方法
+	for(var i = 0; i < this.decorators.length; ++i){
+		//使用对应的装饰器处理
+		this.txt = Text.decorators[this.decorators[i]].get(this.txt);
+	}
+	//获取文本 
+	return this.txt;
+};
+Text.decorators = {}; //保存所有的装饰器
+Text.decorators.punctuation = {
+	//装饰效果1：将标点符号,;!?的后面保留唯一一个空格
+	get : function(txt){
+		return txt.replace(/([,;!\?])\s*/g,'$1 ');
+	}
+};
+Text.decorators.escape = {
+	//装饰效果2：将文本中的&装换为&amp; 将<装换为&lt; 将>转换为&gt;
+	get : function(txt){
+		return txt.replace(/&/g,'&amp;').
+			replace(/</g,'&lt;').
+			replace(/>/g,'&gt;');
+	}
+};
+Text.decorators.italics = {
+	//装饰效果3：将文本中的所有的形如 _xx_转换为 <i>xx</i>
+	get : function(txt){
+		return txt.replace(/_(.*?)_/g,'<i>$1</i>');
+	}
+};
+
+//测试
+var test = new Text('_a_hello world,i am a test!  _a_');
+var result = test.decorate('punctuation').
+				decorate('italics').
+				decorate('escape').
+				get();
+console.log(result); //&lt;i&gt;a&lt;/i&gt;hello world, i am a test! &lt;i&gt;a&lt;/i&gt;
+</script>
+</body>
+</html>

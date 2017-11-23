@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>使用严格模式例子</title>
+</head>
+<body>
+<script>
+/*
+ES5引入了严格模式： 严格模式是不向后兼容的，可以使用"use strict"语句进行设置。如果浏览器不支持严格模式，这一条语句将被忽略。严格模式下，有些js的功能和结构是不允许的。主要有： 
+	使用with语句  
+	使用未申明的变量  
+	使用arguments.callee或者是arguments.caller
+	试图给只读的属性赋值，例如window.Infinity = 0，这个语句在ES3中是可行的。
+	试图删除不可配置的属性
+	带有重复属性的对象直接量
+	形参名称重复的函数。在ES3中 function(a,a,a)是可行的。
+*/
+
+//严格模式下使用带有重复属性名称直接量
+console.log((function(){
+	"use strict"; //使用严格模式，如果浏览器不支持这条语句会被忽略
+	return {a:'hello', a: 'world'};  //这里的测试在ff中没有报错，对象只是存在一个属性a='world'，严格模式看来使用的并不是那么广泛
+})());
+</script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>slice()函数第二个参数是结束的索引，默认是length，-1表示最后一个元素</title>
+</head>
+<body>
+<script>
+/*
+	slice(): 和php中的array_slice()有所不同，php中第二个参数传入的是长度，设计是类C的。而js中第二个参数传入的是结束的索引（索引-1代表最后一个元素，如果不传入，第二个参数默认是length。注意这个函数截取的子数组中不包括结束的索引位置）
+*/
+
+var arr = [1,2,3,4,5];
+console.log(arr.slice(1,-1)); //2,3,4
+console.log(arr.slice(-2)); //第二参数如果没有传入默认是length，这里表示截取这个数组的最后两个元素,结果为 4,5
+</script>	
+</body>
+</html>

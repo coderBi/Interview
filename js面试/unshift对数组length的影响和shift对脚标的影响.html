@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>unshift对数组length的影响和shift对脚标的影响</title>
+</head>
+<body>
+<script>
+/*
+	unshift(): 在数组的头部添加元素，内部会设计到后续数组脚标的修改，返回新的length。
+	shift()： 删除第一个元素并且返回这个元素。这个函数删除第一个元素之后会修改后续元素的脚标，让他们进行前移。
+---note: 无论是unshift还是shift函数，内部都会自动修改length属性
+*/
+	var arr = [1,2,3,4];
+	arr.unshift(5);
+	console.log(arr[1]); //1，因为是在最前面进行插入，所以后面的元素的索引会发生改变
+	console.log(arr.shift());
+	console.log(arr[1]); //2，因为这个函数删除第一个元素之后，会进行后面元素的脚标的修改
+</script>
+</body>
+</html>
