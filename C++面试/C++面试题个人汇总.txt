@@ -4015,3 +4015,101 @@ note:
 	int GetDistance(Node * T){
 		return GetDistanceAndHeight(T).distance;
 	}
+	
+
+220，一个二叉树上面每一个节点上存放一个int，寻找所有满足路径上的节点的和是一个给定的int的路径。这个路径节点不需要一定通过根节点或者是叶节点。
+分析：
+如果使用递归的思路，可以这样考虑，要根节点的时候在左右子树寻找sum减去根节点的值，不要根节点的时候在左右子树寻找sum。这个算法的复杂度个人推出来的是n*n，整个递归的基是树是空树。上述表述存在一个问题：如果根节点采用了，那么下面分析左右子树的时候左右节点必须也被采用，否则路径就会断掉，解决这个问题的方法是在递归的函数中传入之前的已经采用的节点(也可以只存节点的值)集合，如果判断这个集合是空的，那么当前的根节点是可以不要的，否则必须采用当前的节点。
+代码：
+	/**
+	* 在一个已经确定了一部分路径的前提下，在一个子树上寻找节点和是某一个sum的的路径
+	* 
+	* @param Node *T 要操作的二叉子树
+	* @param int sum 要寻找的节点值之和
+	* @param std::vector<int> valuesAdded 在进入这个子树之前已经确定保存了的节点
+	*/
+	void FindRouteImpl(Node * T, int sum, std::vector<int> valuesAdded){
+		if(!T)
+			return;
+		if(!valuesAdded.size()){
+			//已经保存的节点值的集合为空，那么可以在左右子树中寻找满足和为sum的路径
+			FindRouteImpl(T->left, sum, valuesAdded);
+			FindRouteImpl(T->right, sum, valuesAdded);
+		}
+
+		valuesAdded.push_back(T->data);
+		//判断路径
+		if(T->data == sum){
+			//打印路径
+			std::cout << "{";
+			for(auto item = valuesAdded.begin(); item != valuesAdded.end(); item++){
+				std::cout << " " << *item;
+			}
+			std::cout << " }" << std::endl;
+		}
+		//采用当前的根节点的前提下，在左右子树寻找sum-T->data
+		FindRouteImpl(T->left, sum - T->data, valuesAdded);
+		FindRouteImpl(T->right, sum - T->data, valuesAdded);
+	}
+
+	/**
+	* 在一个二叉树上面寻找节点的和是某一个整数的所有路径
+	* 
+	* @param Node * T 要查询的二叉树
+	* @param int sum 节点值构成的目标和
+	*/
+	void FindRoute(Node * T, int sum){
+		std::vector<int> v;
+		FindRouteImpl(T, sum, v);
+	}
+下面是书籍上给出的另一种从下往上进行查询的方法：从根节点开始保存每一条的路径，然后在保存的路径的末端开始进行回溯（这样节点的末端是一定会使用上的），一直进行节点的值的累加，如果出现了给定的sum，就进行路径的打印。
+自底向上的递归求解代码：
+	/**
+	* 从下向根节点查找路径上节点值的和是某一个int的所有路径
+	*
+	* @param Node * T 当前查找到的二叉树子树
+	* @param int sum 要计算的目标和
+	* @param std::vector<int> valuesFromRoot 记录的是从根节点向下到当前节点之前的路径节点的值
+	*/
+	void FindRouteFromBottom2Top(Node *T, int sum, std::vector<int> valuesFromRoot){
+		if(!T)
+			return;
+		valuesFromRoot.push_back(T->data);
+		//从当前的元素向后根节点回溯
+		int size = valuesFromRoot.size();
+		int sum1 = sum; //另存一个值在循环里面使用
+		for(int i = size -1; i >= 0; i--){
+			sum1 -= valuesFromRoot[i];
+			if(!sum1){
+				//打印路径
+				std::cout << "{";
+				for(int j = i; j <= size -1; j++){
+					std::cout << " " << valuesFromRoot[j];
+				}
+				std::cout << " }" << endl;
+			}
+		}
+		//向下一层递归
+		FindRouteFromBottom2Top(T->left, sum, valuesFromRoot);
+		FindRouteFromBottom2Top(T->right, sum, valuesFromRoot);
+	}
+	/**
+	* 在一个二叉树上面寻找节点的和是某一个整数的所有路径
+	* 
+	* @param Node * T 要查询的二叉树
+	* @param int sum 节点值构成的目标和
+	*/
+	void FindRoute(Node * T, int sum){
+		std::vector<int> v;
+		FindRouteFromBottom2Top(T, sum, v);
+	}
+	
+
+221，已知先序和后序遍历，能不能确定一棵二叉树。
+分析：
+不能，如果已知先序和中序，或者是已知后序和中序，或者是知道先序和层序。这是可以确定一棵二叉树的。但是如果知道先序和后序是没有办法确定一棵二叉树的，原因是先序是从前到后依次读取，而后序是从后到前依次读取，没有办法确定层序和左右关系。
+
+
+222，已知一个二叉树的先序和中序序列。序列每一个项各不相同，如果确定这个二叉树。
+分析：
+先读取一个先序，然后在中序中找到这个先序元素，这个作为根元素，将中序序列分割成了左右两边，左边的是左子树，右边的右子树。然后可以使用递归的思想，取得左右子树之后追加到原来的根元素上。这个递归的base是中序为空的时候直接返回null。可以分析得到算法的复杂度是二次的。根据实际需要考虑是否需要进行异常处理（例如如果输入的先序和中序是错的，根本不可能是同一个树上的）
